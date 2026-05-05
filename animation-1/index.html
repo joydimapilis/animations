@@ -1,12 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Typing Indicator Animation</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Typing Indicator Animation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #111113;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Canvas ── */
+    .canvas {
+      position: relative;
+      width: 556px;
+      height: 598px;
+      background: #1a1a1c;
+      overflow: hidden;
+      border-radius: 6px;
+    }
+
+    /* ── Dot-grid overlay ── */
+    .dot-grid {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #2d2d31 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Scroll animation ──
+       775px travel (635 → -140) over 12 s, looping.
+       Agents staggered by 4 s so they are always spread vertically:
+         agent-0 (delay  0s) → enters from below at t=0
+         agent-1 (delay -4s) → mid-canvas at t=0
+         agent-2 (delay -8s) → near top at t=0
+    ── */
+    @keyframes scrollUp {
+      from { transform: translateY(635px); }
+      to   { transform: translateY(-140px); }
+    }
+
+    .agent-track {
+      position: absolute;
+      top: 0;
+      animation: scrollUp 12s linear infinite;
+      z-index: 1;
+    }
+
+    /* Per-agent horizontal position, bubble size, scroll stagger */
+    .agent-0 { left: 298px; width: 176px; animation-delay:  0s; }
+    .agent-1 { left: 148px; width: 148px; animation-delay: -4s; }
+    .agent-2 { left: 248px; width: 108px; animation-delay: -8s; }
+
+    /* ── Cursor icon ── */
+    .cursor {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    /* agent-0: cursor 30×36, bubble h=46 → top=(46-36)/2=5px, left=-(30+18)=-48px */
+    .agent-0 .cursor { width: 30px; height: 36px; left: -48px; top: 5px; }
+    /* agent-1: cursor 24×29, bubble h=40 → top=(40-29)/2≈6px, left=-(24+18)=-42px */
+    .agent-1 .cursor { width: 24px; height: 29px; left: -42px; top: 6px; }
+    /* agent-2: cursor 18×22, bubble h=34 → top=(34-22)/2=6px,  left=-(18+18)=-36px */
+    .agent-2 .cursor { width: 18px; height: 22px; left: -36px; top: 6px; }
+
+    /* ── Bubble ── */
+    .bubble {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      border: 1.5px solid #393939;
+      background: #252528;
+      box-shadow: 0 0 0px rgba(0, 204, 85, 0);
+      transition:
+        border-color     0.45s ease-out,
+        background-color 0.45s ease-out,
+        box-shadow       0.45s ease-out;
+    }
+
+    .agent-0 .bubble { width: 176px; height: 46px; border-radius: 23px; }
+    .agent-1 .bubble { width: 148px; height: 40px; border-radius: 20px; }
+    .agent-2 .bubble { width: 108px; height: 34px; border-radius: 17px; }
+
+    /* Active bubble */
+    .agent-track.active .bubble {
+      border-color: #00cc55;
+      background: rgba(0, 204, 85, 0.055);
+      box-shadow: 0 0 0 1px rgba(0, 204, 85, 0.13), 0 0 22px rgba(0, 204, 85, 0.38);
+    }
+
+    /* ── Typing dots ── */
+    @keyframes dotInactive {
+      0%, 100% { transform: scale(0.88); opacity: 0.42; }
+      50%       { transform: scale(1.02); opacity: 0.62; }
+    }
+
+    @keyframes dotActive {
+      0%, 100% { transform: scale(0.75); opacity: 0.65; }
+      50%       { transform: scale(1.20); opacity: 1;    }
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #555558;
+      animation: dotInactive 1.15s ease-in-out infinite;
+      transition: background-color 0.45s ease-out;
+    }
+
+    .agent-track.active .dot {
+      background: #00cc55;
+      animation: dotActive 1.15s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="canvas">
+    <div class="dot-grid"></div>
+
+    <!-- Agent 0: large (176×46), cursor 30px, x=298 -->
+    <div class="agent-track agent-0">
+      <svg class="cursor" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 1.5L2 19.5L6.8 14.4L10 22L13 20.5L9.8 13L18 13L2 1.5Z"
+              fill="rgba(26,26,28,0.88)" stroke="#787878" stroke-width="1.35"
+              stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <div class="bubble">
+        <div class="dot" style="animation-delay: 0s"></div>
+        <div class="dot" style="animation-delay: 0.22s"></div>
+        <div class="dot" style="animation-delay: 0.44s"></div>
+      </div>
+    </div>
+
+    <!-- Agent 1: medium (148×40), cursor 24px, x=148 -->
+    <div class="agent-track agent-1">
+      <svg class="cursor" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 1.5L2 19.5L6.8 14.4L10 22L13 20.5L9.8 13L18 13L2 1.5Z"
+              fill="rgba(26,26,28,0.88)" stroke="#787878" stroke-width="1.35"
+              stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <div class="bubble">
+        <div class="dot" style="animation-delay: 0s"></div>
+        <div class="dot" style="animation-delay: 0.22s"></div>
+        <div class="dot" style="animation-delay: 0.44s"></div>
+      </div>
+    </div>
+
+    <!-- Agent 2: small (108×34), cursor 18px, x=248 -->
+    <div class="agent-track agent-2">
+      <svg class="cursor" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 1.5L2 19.5L6.8 14.4L10 22L13 20.5L9.8 13L18 13L2 1.5Z"
+              fill="rgba(26,26,28,0.88)" stroke="#787878" stroke-width="1.35"
+              stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+      <div class="bubble">
+        <div class="dot" style="animation-delay: 0s"></div>
+        <div class="dot" style="animation-delay: 0.22s"></div>
+        <div class="dot" style="animation-delay: 0.44s"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tracks = document.querySelectorAll('.agent-track');
+    let active = 0;
+    tracks[active].classList.add('active');
+
+    setInterval(() => {
+      tracks[active].classList.remove('active');
+      active = (active + 1) % tracks.length;
+      tracks[active].classList.add('active');
+    }, 4000);
+  </script>
+
+</body>
 </html>
