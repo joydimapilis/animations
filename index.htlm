@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Animations</title>
+  <meta http-equiv="refresh" content="0; url=/animation-1" />
+</head>
+<body>
+  <ul>
+    <li><a href="/animation-1">Animation 1</a></li>
+    <li><a href="/animation-2">Animation 2</a></li>
+  </ul>
+</body>
+</html>
