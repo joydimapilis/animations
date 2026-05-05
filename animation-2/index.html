@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visa Card Animation</title>
+<style>
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: #fdf4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Background orbs ── */
+.bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+}
+
+.bg-orb--purple {
+  width: 540px;
+  height: 540px;
+  background: radial-gradient(circle, #c9a8e8 0%, #a070cc 55%, transparent 70%);
+  top: 10%;
+  left: -14%;
+  opacity: 0.55;
+  animation: orbPulse1 12s ease-in-out infinite;
+}
+
+.bg-orb--coral {
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, #e8c0a8 0%, #cc9878 55%, transparent 70%);
+  top: 28%;
+  right: -12%;
+  opacity: 0.50;
+  animation: orbPulse2 12s ease-in-out infinite;
+}
+
+.bg-orb--pink {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, #f4cce8 0%, #e0a0d0 55%, transparent 70%);
+  top: -8%;
+  right: 20%;
+  opacity: 0.40;
+  animation: orbPulse3 16s ease-in-out infinite;
+}
+
+@keyframes orbPulse1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  35%       { transform: translate(28px, -40px) scale(1.12); }
+  70%       { transform: translate(-18px, 22px) scale(0.94); }
+}
+
+@keyframes orbPulse2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-32px, 28px) scale(0.90); }
+  72%       { transform: translate(18px, -22px) scale(1.08); }
+}
+
+@keyframes orbPulse3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(22px, 32px) scale(1.16); }
+}
+
+/* ── Scene wrapper (perspective) ── */
+.scene {
+  perspective: 900px;
+  perspective-origin: center center;
+}
+
+/* ── Card ── */
+.card {
+  width: 340px;
+  height: 456px;
+  border-radius: 22px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 32px 72px rgba(170, 70, 150, 0.30),
+    0 14px 34px rgba(0, 0, 0, 0.14),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.55);
+  transform-style: preserve-3d;
+  animation: cardIdle 10s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* subtle idle 3-D rocking that mirrors the source */
+@keyframes cardIdle {
+  0%   { transform: rotateX(2.5deg)  rotateY(-3.5deg) scale(0.975); }
+  18%  { transform: rotateX(0.5deg)  rotateY(-0.5deg) scale(0.988); }
+  35%  { transform: rotateX(-0.8deg) rotateY(1.5deg)  scale(1.000); }
+  52%  { transform: rotateX(-1.2deg) rotateY(2.5deg)  scale(1.005); }
+  68%  { transform: rotateX(0.8deg)  rotateY(0.5deg)  scale(1.000); }
+  83%  { transform: rotateX(1.8deg)  rotateY(-2.0deg) scale(0.983); }
+  100% { transform: rotateX(2.5deg)  rotateY(-3.5deg) scale(0.975); }
+}
+
+/* ── Gradient section (top 72 %) ── */
+.card__gradient {
+  position: relative;
+  height: 72%;
+  overflow: hidden;
+  /*
+    200% size means we see ~50% of gradient at once → all 3 colour zones
+    (pink, purple, coral) visible as diagonal bands simultaneously.
+    Animation shifts background-position diagonally to cycle bands.
+  */
+  background: linear-gradient(
+    135deg,
+    #ff00cc   0%,
+    #ff22dd   6%,
+    #ff00cc  12%,
+    #ee11dd  18%,
+    #cc33ee  24%,
+    #9922cc  30%,
+    #7711bb  36%,
+    #6600aa  44%,
+    #7722bb  52%,
+    #aa55bb  58%,
+    #cc6677  63%,
+    #cc7755  69%,
+    #dd8844  77%,
+    #ee9966  87%,
+    #ffaacc  94%,
+    #ff00cc 100%
+  );
+  background-size: 200% 200%;
+  animation: gradientFlow 10s ease-in-out infinite;
+  will-change: background-position;
+}
+
+/*
+  With background-size 200%×200% and 135deg diagonal gradient:
+  - pos  0%   0%  → t ≈ 0–50%  → hot pink fading to purple (frames 1-3)
+  - pos 50%  50%  → t ≈ 25–75% → purple zone (frames 6-10)
+  - pos 100% 100% → t ≈ 50–100%→ purple → coral → pink (frames 12-15)
+*/
+@keyframes gradientFlow {
+  0%   { background-position: 0%   0%;   }
+  35%  { background-position: 45%  45%;  }
+  65%  { background-position: 80%  80%;  }
+  88%  { background-position: 100% 100%; }
+  100% { background-position: 0%   0%;   }
+}
+
+/* animated brush-stroke texture shift */
+.card__gradient::before {
+  content: '';
+  position: absolute;
+  inset: -40% -30%;
+  background: repeating-linear-gradient(
+    126deg,
+    transparent            0px,
+    transparent            3px,
+    rgba(255,255,255,0.06) 3px,
+    rgba(255,255,255,0.06) 4px
+  );
+  animation: brushShift 10s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes brushShift {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(100px, 100px); }
+}
+
+/* ── Light streaks ── */
+.streak {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* primary streak — broad, bright */
+.streak--1 {
+  background: linear-gradient(
+    126deg,
+    transparent           0%,
+    transparent          32%,
+    rgba(255,255,255,0.00) 39%,
+    rgba(255,255,255,0.72) 43%,
+    rgba(255,255,255,0.92) 45%,
+    rgba(255,255,255,0.72) 47%,
+    rgba(255,255,255,0.00) 52%,
+    transparent          60%,
+    transparent         100%
+  );
+  animation: streak1 10s ease-in-out infinite;
+}
+
+@keyframes streak1 {
+  0%   { transform: translateX(-130%) translateY(-15%); opacity: 0;   }
+  6%   { opacity: 1; }
+  48%  { transform: translateX(55%)   translateY(18%);  opacity: 0.9; }
+  58%  { transform: translateX(160%)  translateY(38%);  opacity: 0;   }
+  100% { transform: translateX(-130%) translateY(-15%); opacity: 0;   }
+}
+
+/* secondary streak — narrower, slightly delayed */
+.streak--2 {
+  background: linear-gradient(
+    126deg,
+    transparent           0%,
+    transparent          52%,
+    rgba(255,255,255,0.00) 57%,
+    rgba(255,255,255,0.50) 60%,
+    rgba(255,255,255,0.60) 62%,
+    rgba(255,255,255,0.50) 64%,
+    rgba(255,255,255,0.00) 68%,
+    transparent          75%,
+    transparent         100%
+  );
+  animation: streak2 10s ease-in-out infinite;
+}
+
+@keyframes streak2 {
+  0%   { transform: translateX(-140%) translateY(-15%); opacity: 0; }
+  18%  { opacity: 0; }
+  22%  { opacity: 1; }
+  62%  { transform: translateX(75%)   translateY(28%);  opacity: 0.7; }
+  72%  { transform: translateX(180%)  translateY(48%);  opacity: 0; }
+  100% { transform: translateX(-140%) translateY(-15%); opacity: 0; }
+}
+
+/* ── EMV Chip ── */
+.chip {
+  position: absolute;
+  top: 30%;
+  left: 19%;
+  width: 54px;
+  height: 43px;
+  border-radius: 5px;
+  background: linear-gradient(
+    148deg,
+    #f2eacc 0%,
+    #d8c898 18%,
+    #f0e6c0 34%,
+    #c8b880 50%,
+    #e4d6a8 65%,
+    #d0c088 82%,
+    #f2eacc 100%
+  );
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.28),
+    inset 0 1px 2px rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+}
+
+/* horizontal dividers */
+.chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(transparent 32%, rgba(0,0,0,0.13) 32%, rgba(0,0,0,0.13) 36%, transparent 36%),
+    linear-gradient(transparent 63%, rgba(0,0,0,0.13) 63%, rgba(0,0,0,0.13) 67%, transparent 67%),
+    linear-gradient(90deg, transparent 30%, rgba(0,0,0,0.11) 30%, rgba(0,0,0,0.11) 34%, transparent 34%),
+    linear-gradient(90deg, transparent 65%, rgba(0,0,0,0.11) 65%, rgba(0,0,0,0.11) 69%, transparent 69%);
+}
+
+/* center contact pad */
+.chip::after {
+  content: '';
+  position: absolute;
+  top: 33%;
+  left: 31%;
+  width: 38%;
+  height: 33%;
+  background: linear-gradient(148deg, #d8c878 0%, #b09850 45%, #cebe70 100%);
+  border-radius: 2px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.22);
+}
+
+/* ── NFC contactless icon ── */
+.nfc {
+  position: absolute;
+  top: 28%;
+  left: calc(19% + 62px);
+  height: 43px;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+}
+
+/* ── White bottom panel ── */
+.card__bottom {
+  height: 28%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 26px 4px;
+}
+
+/* ── Visa logo ── */
+.visa-logo {
+  font-family: 'Times New Roman', Georgia, serif;
+  font-size: 34px;
+  font-weight: 900;
+  font-style: italic;
+  color: #1a1f71;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  user-select: none;
+}
+
+</style>
+</head>
+<body>
+
+<!-- background colour orbs -->
+<div class="bg">
+  <div class="bg-orb bg-orb--purple"></div>
+  <div class="bg-orb bg-orb--coral"></div>
+  <div class="bg-orb bg-orb--pink"></div>
+</div>
+
+<!-- card -->
+<div class="scene" id="scene">
+  <div class="card" id="card">
+
+    <!-- gradient section -->
+    <div class="card__gradient">
+      <div class="streak streak--1"></div>
+      <div class="streak streak--2"></div>
+      <div class="chip"></div>
+      <div class="nfc">
+        <!-- Three concentric right-facing semicircular arcs; all centred at (2,12) -->
+        <svg width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 2 7  A 5  5  0 0 1 2 17" stroke="rgba(255,255,255,0.90)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M 2 3  A 9  9  0 0 1 2 21" stroke="rgba(255,255,255,0.90)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M 2 -1 A 13 13 0 0 1 2 25" stroke="rgba(255,255,255,0.90)" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- white bottom section -->
+    <div class="card__bottom">
+      <span class="visa-logo">VISA</span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  const card = document.getElementById('card');
+  let isHovering = false;
+
+  function applyTilt(e) {
+    isHovering = true;
+    card.style.animation = 'none';
+    const cx = window.innerWidth  / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / (window.innerWidth  / 2);
+    const dy = (e.clientY - cy) / (window.innerHeight / 2);
+    const rx = -dy * 14;
+    const ry =  dx * 14;
+    card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+  }
+
+  function resetTilt() {
+    isHovering = false;
+    card.style.animation = '';
+    card.style.transform  = '';
+  }
+
+  document.addEventListener('mousemove', applyTilt);
+
+  document.addEventListener('mouseleave', resetTilt);
+
+  /* touch support */
+  document.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    applyTilt({ clientX: t.clientX, clientY: t.clientY });
+  }, { passive: true });
+
+  document.addEventListener('touchend', resetTilt);
+})();
+</script>
+
+</body>
+</html>

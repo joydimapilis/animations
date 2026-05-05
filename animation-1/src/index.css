@@ -1,0 +1,59 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  background: #111113;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ── Canvas: matches the original 556×598 video frame ── */
+.canvas {
+  position: relative;
+  width: 556px;
+  height: 598px;
+  background: #1a1a1c;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+/* ── Dot-grid overlay ── */
+/* 28px grid, 1.5px dots at #2d2d31 – matches source video */
+.dot-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #2d2d31 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Continuous upward scroll ── */
+/*
+ * Each agent-track scrolls from FROM_Y=635 to TO_Y=-140 (775px travel)
+ * over 12 s on a linear loop. The three agents are staggered by -4 s and -8 s
+ * so they are always spread across the canvas at different vertical positions.
+ *
+ * At t = 0:
+ *   agent 0 (delay  0 s) → y = 635  (entering from bottom)
+ *   agent 1 (delay -4 s) → y = 635 - 775×(4/12) ≈ 376  (mid canvas)
+ *   agent 2 (delay -8 s) → y = 635 - 775×(8/12) ≈ 118  (near top)
+ */
+@keyframes scrollUp {
+  from { transform: translateY(635px); }
+  to   { transform: translateY(-140px); }
+}
+
+.agent-track {
+  position: absolute;
+  top: 0;
+  animation: scrollUp 12s linear infinite;
+  z-index: 1;
+}
