@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animation Showcase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #16161f;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.15);
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #55556a;
+      --accent: #4A6CF7;
+      --accent-glow: rgba(74, 108, 247, 0.15);
+      --accent-light: #7b96ff;
+      --green: #00cc55;
+      --sans: 'Inter', sans-serif;
+      --serif: 'Instrument Serif', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 64px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-logo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-light);
+      background: rgba(74, 108, 247, 0.12);
+      border: 1px solid rgba(74, 108, 247, 0.2);
+      padding: 4px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero {
+      position: relative;
+      padding: 100px 64px 80px;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(74, 108, 247, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-light);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 5vw, 68px);
+      font-weight: 300;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      max-width: 700px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 em {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent-light);
+    }
+
+    .hero p {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 40px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+    }
+
+    .stat { display: flex; flex-direction: column; gap: 4px; }
+    .stat-number { font-size: 28px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.03em; }
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 64px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .animations-list {
+      padding: 0 64px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .animation-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 540px;
+      transition: border-color 0.3s;
+    }
+
+    .animation-card:hover { border-color: var(--border-hover); }
+
+    .animation-card:nth-child(even) { direction: rtl; }
+    .animation-card:nth-child(even) > * { direction: ltr; }
+
+    .preview-panel {
+      background: #0d0d10;
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+
+    .animation-card:nth-child(even) .preview-panel {
+      border-right: none;
+      border-left: 1px solid var(--border);
+    }
+
+    .preview-panel iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    .preview-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 70%, rgba(13,13,16,0.4) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .card-chip {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      padding: 5px 12px 5px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .card-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .info-panel {
+      padding: 44px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .info-number { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; }
+
+    .info-title { font-size: 26px; font-weight: 400; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.25; }
+    .info-title em { font-family: var(--serif); font-style: italic; color: var(--accent-light); }
+
+    .info-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .divider { height: 1px; background: var(--border); }
+
+    .prompt-section { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+
+    .prompt-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prompt-label::before {
+      content: '';
+      width: 3px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .prompt-box {
+      background: rgba(74, 108, 247, 0.04);
+      border: 1px solid rgba(74, 108, 247, 0.15);
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 11.5px;
+      font-weight: 400;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      flex: 1;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+      max-height: 240px;
+    }
+
+    .prompt-box::-webkit-scrollbar { width: 4px; }
+    .prompt-box::-webkit-scrollbar-track { background: transparent; }
+    .prompt-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .prompt-box strong { color: var(--accent-light); font-weight: 500; }
+
+    .view-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-decoration: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 11px 20px;
+      border-radius: 10px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      width: fit-content;
+      margin-top: auto;
+    }
+
+    .view-link:hover {
+      background: rgba(74, 108, 247, 0.1);
+      border-color: rgba(74, 108, 247, 0.3);
+      color: var(--accent-light);
+    }
+
+    .view-link-arrow { font-size: 14px; transition: transform 0.2s; }
+    .view-link:hover .view-link-arrow { transform: translate(2px, -2px); }
+
+    footer {
+      padding: 40px 64px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p { font-size: 13px; color: var(--text-muted); }
+    footer span { color: var(--accent-light); }
+
+    @media (max-width: 900px) {
+      nav, .hero, .animations-list, .section-label, footer { padding-left: 24px; padding-right: 24px; }
+      .hero { padding-top: 60px; }
+      .animation-card, .animation-card:nth-child(even) { grid-template-columns: 1fr; direction: ltr; min-height: auto; }
+      .preview-panel { height: 280px; border-right: none !important; border-left: none !important; border-bottom: 1px solid var(--border); }
+      .info-panel { padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">
+      <div class="nav-logo-dot"></div>
+      Animation Showcase
+    </div>
+    <span class="nav-badge">2 recreations</span>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-eyebrow">Claude Code · Video Recreation</div>
+    <h1>Video to web, <em>frame by frame.</em></h1>
+    <p>Each animation was analyzed from a source video using Claude Code — extracted, described, and faithfully rebuilt in pure HTML, CSS, and JavaScript.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-number">2</span>
+        <span class="stat-label">Animations</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">HTML</span>
+        <span class="stat-label">Output format</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">0</span>
+        <span class="stat-label">Dependencies</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-label">Recreations</div>
+
+  <div class="animations-list">
+
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-1" title="Animation 1" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 01</div>
+        <h3 class="info-title">Typing Indicator<br><em>Animation</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span>
+          <span class="tag">CSS</span>
+          <span class="tag">Vanilla JS</span>
+          <span class="tag">Looping</span>
+          <span class="tag">12s cycle</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Claude Code Prompt</p>
+          <div class="prompt-box">I have a local video file at <strong>/Users/joysanpedro/Desktop/Animation/Anim1.mov</strong> that contains an animation I want to recreate programmatically.
+
+<strong>1. Analyze the video</strong> — Extract key frames using ffmpeg to understand the animation's visual content, timing, movement, and style.
+
+<strong>2. Describe what you observe</strong> — Elements animated, motion/transition types, timing/easing, color palette and visual style.
+
+<strong>3. Recreate the animation</strong> — Build a faithful recreation as a single self-contained HTML file using only HTML, CSS, and vanilla JavaScript. No frameworks, no dependencies.
+
+<strong>4. Save the output</strong> as index.html inside a folder named animation-1.</div>
+        </div>
+        <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-1" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+      </div>
+    </div>
+
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-2" title="Animation 2" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 02</div>
+        <h3 class="info-title">Typing Indicator<br><em>Animation 2</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span>
+          <span class="tag">CSS</span>
+          <span class="tag">Vanilla JS</span>
+          <span class="tag">Looping</span>
+          <span class="tag">12s cycle</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Claude Code Prompt</p>
+          <div class="prompt-box">I have a local video file at <strong>/Users/joysanpedro/Desktop/Animation/Animation 2.mov</strong> that contains an animation I want to recreate programmatically.
+
+<strong>1. Analyze the video</strong> — Extract key frames using ffmpeg to understand the animation's visual content, timing, movement, and style.
+
+<strong>2. Describe what you observe</strong> — Elements animated, motion/transition types, timing/easing, color palette and visual style.
+
+<strong>3. Recreate the animation</strong> — Build a faithful recreation as a single self-contained HTML file using only HTML, CSS, and vanilla JavaScript. No frameworks, no dependencies.
+
+<strong>4. Save the output</strong> as index.html inside a folder named animation-2.</div>
+        </div>
+        <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-2" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Built with <span>Claude Code</span></p>
+    <p>2 animations · HTML / CSS / JS · No dependencies</p>
+  </footer>
+
+</body>
+</html>
