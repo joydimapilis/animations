@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/animation-1", "destination": "/animation-1/index.html" },
-    { "source": "/animation-2", "destination": "/animation-2/index.html" }
+    { "source": "/animation-1", "destination": "/animation-1.html" },
+    { "source": "/animation-2", "destination": "/animation-2.html" }
   ]
 }
