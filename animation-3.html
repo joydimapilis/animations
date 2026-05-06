@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stacked Layers Animation</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Scene: global stack float (one full sine wave = 9.68 s) ─────────────── */
+    .scene {
+      position: relative;
+      width: 500px;
+      height: 470px;
+      animation: stackFloat 9.68s ease-in-out infinite;
+    }
+
+    @keyframes stackFloat {
+      0%   { transform: translateY(  0px); }
+      25%  { transform: translateY(-14px); }
+      50%  { transform: translateY(  0px); }
+      75%  { transform: translateY( 14px); }
+      100% { transform: translateY(  0px); }
+    }
+
+    /* ── Card wrapper: receives JS cursor-parallax via CSS custom props ───────── */
+    .card-wrapper {
+      position: absolute;
+      left: 41px; /* (500 - 418) / 2 */
+      transform: translate(var(--cx, 0px), var(--cy, 0px));
+      will-change: transform;
+    }
+
+    /* ── Card inner: per-card breathing animation ─────────────────────────────── */
+    .card-inner {
+      position: relative;
+      width: 418px;
+      height: 126px; /* 114 card face + 12 depth shadow room */
+    }
+
+    /* Top & bottom cards: gentle float in-phase */
+    .float-outer {
+      animation: floatOuter 4.84s ease-in-out infinite;
+    }
+    @keyframes floatOuter {
+      0%   { transform: translateY(  0px); }
+      25%  { transform: translateY( -5px); }
+      50%  { transform: translateY(  0px); }
+      75%  { transform: translateY(  5px); }
+      100% { transform: translateY(  0px); }
+    }
+
+    /* Middle card: counter-phase → gaps breathe in/out */
+    .float-mid {
+      animation: floatMid 4.84s ease-in-out infinite;
+    }
+    @keyframes floatMid {
+      0%   { transform: translateY(  0px); }
+      25%  { transform: translateY( 12px); }
+      50%  { transform: translateY(  0px); }
+      75%  { transform: translateY(-12px); }
+      100% { transform: translateY(  0px); }
+    }
+
+    /* ── Icon container: clipped to the diamond shape ────────────────────────── */
+    .card-icon {
+      position: absolute;
+      top: 0; left: 0;
+      width: 418px; height: 114px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* diamond clip — matches the SVG polygon exactly */
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    }
+  </style>
+</head>
+<body>
+
+<div class="scene">
+
+  <!-- ── TOP CARD: Webpack ──────────────────────────────────────────────────── -->
+  <div class="card-wrapper" id="cw-top" style="top: 25px;">
+    <div class="card-inner float-outer">
+
+      <!-- Depth shadow (shifted down 10 px to fake card thickness) -->
+      <svg width="418" height="126"
+           style="position:absolute;top:10px;left:0;pointer-events:none"
+           aria-hidden="true">
+        <polygon points="209,1 417,57 209,113 1,57"
+                 fill="rgba(255,255,255,0.032)"/>
+      </svg>
+
+      <!-- Card face + gradient border -->
+      <svg width="418" height="114"
+           style="position:absolute;top:0;left:0;pointer-events:none"
+           aria-hidden="true">
+        <defs>
+          <linearGradient id="g-top" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.06)"/>
+          </linearGradient>
+        </defs>
+        <polygon points="209,1 417,57 209,113 1,57" fill="#131318"/>
+        <polygon points="209,1 417,57 209,113 1,57"
+                 fill="none" stroke="url(#g-top)" stroke-width="1.6"/>
+      </svg>
+
+      <!-- Webpack: two nested hexagons (outer light, inner dark) -->
+      <div class="card-icon">
+        <svg width="96" height="96" viewBox="-50 -50 100 100" aria-label="Webpack">
+          <!-- outer hexagon -->
+          <polygon points="0,-46 39.84,-23 39.84,23 0,46 -39.84,23 -39.84,-23"
+                   fill="#cacaca"/>
+          <!-- inner cutout -->
+          <polygon points="0,-28 24.25,-14 24.25,14 0,28 -24.25,14 -24.25,-14"
+                   fill="#111115"/>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MIDDLE CARD: GitHub Copilot ───────────────────────────────────────── -->
+  <div class="card-wrapper" id="cw-mid" style="top: 176px;">
+    <div class="card-inner float-mid">
+
+      <svg width="418" height="126"
+           style="position:absolute;top:10px;left:0;pointer-events:none"
+           aria-hidden="true">
+        <polygon points="209,1 417,57 209,113 1,57"
+                 fill="rgba(255,255,255,0.032)"/>
+      </svg>
+
+      <svg width="418" height="114"
+           style="position:absolute;top:0;left:0;pointer-events:none"
+           aria-hidden="true">
+        <defs>
+          <linearGradient id="g-mid" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.06)"/>
+          </linearGradient>
+        </defs>
+        <polygon points="209,1 417,57 209,113 1,57" fill="#131318"/>
+        <polygon points="209,1 417,57 209,113 1,57"
+                 fill="none" stroke="url(#g-mid)" stroke-width="1.6"/>
+      </svg>
+
+      <!-- GitHub Copilot: purple donut ring + cat silhouette -->
+      <div class="card-icon">
+        <svg width="100" height="100" viewBox="-52 -52 104 104"
+             aria-label="GitHub Copilot">
+          <!-- ring -->
+          <circle cx="0" cy="0" r="37"
+                  stroke="#4e23ec" stroke-width="13" fill="none"/>
+          <!-- cat body -->
+          <circle cx="0" cy="6" r="18" fill="#4e23ec"/>
+          <!-- ears -->
+          <path d="M -12,-12 L -22,-28 L -3,-16 Z" fill="#4e23ec"/>
+          <path d="M  12,-12 L  22,-28 L  3,-16 Z" fill="#4e23ec"/>
+          <!-- eye dots -->
+          <circle cx="-6" cy="4" r="2.5" fill="#111115" opacity="0.7"/>
+          <circle cx=" 6" cy="4" r="2.5" fill="#111115" opacity="0.7"/>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── BOTTOM CARD: Git ──────────────────────────────────────────────────── -->
+  <div class="card-wrapper" id="cw-bot" style="top: 327px;">
+    <div class="card-inner float-outer">
+
+      <svg width="418" height="126"
+           style="position:absolute;top:10px;left:0;pointer-events:none"
+           aria-hidden="true">
+        <polygon points="209,1 417,57 209,113 1,57"
+                 fill="rgba(255,255,255,0.032)"/>
+      </svg>
+
+      <svg width="418" height="114"
+           style="position:absolute;top:0;left:0;pointer-events:none"
+           aria-hidden="true">
+        <defs>
+          <linearGradient id="g-bot" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.06)"/>
+          </linearGradient>
+        </defs>
+        <polygon points="209,1 417,57 209,113 1,57" fill="#131318"/>
+        <polygon points="209,1 417,57 209,113 1,57"
+                 fill="none" stroke="url(#g-bot)" stroke-width="1.6"/>
+      </svg>
+
+      <!-- Git: dark-red rounded rect + branch fork -->
+      <div class="card-icon">
+        <svg width="112" height="80" viewBox="-56 -40 112 80" aria-label="Git">
+          <rect x="-51" y="-33" width="102" height="66" rx="10" fill="#8b1f1f"/>
+          <line x1="-19" y1="0"  x2="21" y2="-17"
+                stroke="#111115" stroke-width="5" stroke-linecap="round"/>
+          <line x1="-19" y1="0"  x2="21" y2=" 17"
+                stroke="#111115" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="-19" cy="  0" r="8" fill="#111115"/>
+          <circle cx=" 21" cy="-17" r="8" fill="#111115"/>
+          <circle cx=" 21" cy=" 17" r="8" fill="#111115"/>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /*
+   * Cursor-driven parallax with spring physics.
+   *
+   * Three motion layers are already handled by CSS:
+   *   1. .scene         — global stack float (9.68 s sine)
+   *   2. .float-outer   — top & bottom card breathing (4.84 s, in-phase)
+   *   3. .float-mid     — middle card breathing (4.84 s, counter-phase)
+   *
+   * This script adds a fourth layer: each card translates toward the cursor
+   * position with spring-damped physics, but at a different depth multiplier
+   * so the parallax creates a genuine 3-D floating-layers feel.
+   *
+   * Spring params mirror Framer Motion's { stiffness: 180, damping: 28, mass: 0.8 }
+   *   natural frequency ω = √(k/m) = √(180/0.8) = 15 rad/s
+   *   damping ratio ζ = d / (2√(km)) = 28/24 ≈ 1.17  → slightly overdamped (no wobble)
+   */
+
+  const STIFFNESS = 180;
+  const DAMPING   = 28;
+  const MASS      = 0.8;
+
+  // Maximum displacement at cursor edge (normalised cursor = ±1)
+  const MAX_X = 28;  // px
+  const MAX_Y = 18;  // px
+
+  const cards = [
+    { el: document.getElementById('cw-top'), mult: 1.30 },
+    { el: document.getElementById('cw-mid'), mult: 1.00 },
+    { el: document.getElementById('cw-bot'), mult: 0.65 },
+  ];
+
+  // Spring state: position + velocity for x and y, per card
+  const state = cards.map(() => ({ x: 0, vx: 0, y: 0, vy: 0 }));
+
+  // Mouse target: normalised to [-1, +1] relative to viewport centre
+  let targetNX = 0;
+  let targetNY = 0;
+
+  window.addEventListener('mousemove', (e) => {
+    targetNX = (e.clientX / window.innerWidth  - 0.5) * 2;
+    targetNY = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  let lastTime = performance.now();
+
+  function tick(now) {
+    // Cap dt so a tab freeze doesn't cause a position explosion
+    const dt = Math.min((now - lastTime) / 1000, 0.05);
+    lastTime = now;
+
+    cards.forEach(({ el, mult }, i) => {
+      const s  = state[i];
+      const tx = targetNX * MAX_X * mult;
+      const ty = targetNY * MAX_Y * mult;
+
+      // Semi-implicit Euler integration of the spring–damper ODE:
+      //   m·ẍ = -k·(x - target) - d·ẋ
+      const ax = (-STIFFNESS * (s.x - tx) - DAMPING * s.vx) / MASS;
+      const ay = (-STIFFNESS * (s.y - ty) - DAMPING * s.vy) / MASS;
+
+      s.vx += ax * dt;
+      s.vy += ay * dt;
+      s.x  += s.vx * dt;
+      s.y  += s.vy * dt;
+
+      el.style.setProperty('--cx', s.x.toFixed(3) + 'px');
+      el.style.setProperty('--cy', s.y.toFixed(3) + 'px');
+    });
+
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+</script>
+
+</body>
+</html>
