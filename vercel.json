@@ -4,6 +4,7 @@
     { "source": "/animation-2", "destination": "/animation-2.html" },
     { "source": "/animation-3", "destination": "/animation-3.html" },
     { "source": "/animation-4", "destination": "/animation-4.html" },
-    { "source": "/animation-5", "destination": "/animation-5.html" }
+    { "source": "/animation-5", "destination": "/animation-5.html" },
+    { "source": "/animation-6", "destination": "/animation-6.html" }
   ]
 }
