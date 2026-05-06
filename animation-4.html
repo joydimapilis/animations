@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animation 4</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
+
+  // ── Physics tuning ───────────────────────────────────────────────────────────
+  // Target: strings settle in ~1 s, deflect ~15–25° at normal mouse speed.
+  // Near-critically-damped so they glide back without excessive oscillation.
+  const K_SPRING      = 18;     // restoring stiffness  (rad s⁻² / rad)
+  const K_DAMP        = 8.5;    // angular damping       (ζ ≈ 1.0)
+  const WIND_STRENGTH = 0.016;  // wind-force scale      (rad s⁻² / (px s⁻¹))
+  const INFLUENCE_R   = 180;    // Gaussian radius (px)
+  const MAX_DELTA     = 0.42;   // hard clamp on angular deflection (rad ≈ 24°)
+  const MAX_VEL       = 1400;   // cursor velocity cap (px s⁻¹) prevents spikes
+
+  // ── Visual ───────────────────────────────────────────────────────────────────
+  const NUM_RAYS  = 185;
+  const LINE_RGB  = '38,55,158';
+  const DOT_RGB   = '32,46,148';
+
+  // ── State ────────────────────────────────────────────────────────────────────
+  let W, H, cx, oy;
+  let rays = [];
+  let lastFrameTime = null;
+
+  // Mouse — EMA-smoothed velocity computed inside the event handler
+  let mx = -99999, my = -99999;
+  let svx = 0, svy = 0;         // smoothed velocity  (px s⁻¹)
+  let lastMt = 0;               // timestamp of last mousemove
+
+  // ── PRNG (deterministic layout) ──────────────────────────────────────────────
+  let _seed = 42;
+  const rnd = () => {
+    _seed = (_seed * 1664525 + 1013904223) & 0xffffffff;
+    return (_seed >>> 0) / 0xffffffff;
+  };
+
+  // ── Setup ─────────────────────────────────────────────────────────────────────
+  function init() {
+    W  = canvas.width  = window.innerWidth;
+    H  = canvas.height = window.innerHeight;
+    cx = W / 2;
+    oy = H + 6;
+
+    const maxLen = Math.sqrt(W * W + H * H) * 0.94;
+
+    _seed = 42;
+    rays = Array.from({ length: NUM_RAYS }, (_, i) => {
+      const t      = i / (NUM_RAYS - 1);
+      const base   = Math.PI * (0.02 + t * 0.96);
+      const jitter = (rnd() - 0.5) * (Math.PI / NUM_RAYS) * 5;
+      const rest   = base + jitter;
+      return {
+        restAngle: rest,
+        angle:     rest,
+        omega:     0,
+        len:       maxLen * (0.22 + Math.pow(rnd(), 0.75) * 0.78),
+        dotR:      1.8 + rnd() * 2.2,
+        lineAlpha: 0.38 + rnd() * 0.42,
+      };
+    });
+  }
+
+  // ── Background ───────────────────────────────────────────────────────────────
+  function drawBackground() {
+    const rg = ctx.createRadialGradient(cx, H * 0.05, 0, cx, H * 0.15, H * 1.35);
+    rg.addColorStop(0.00, '#f2f7ff');
+    rg.addColorStop(0.18, '#e2ecfc');
+    rg.addColorStop(0.42, '#d0e2f8');
+    rg.addColorStop(0.70, '#bdd4f0');
+    rg.addColorStop(1.00, '#a8c4e8');
+    ctx.fillStyle = rg;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // ── Physics ───────────────────────────────────────────────────────────────────
+  //
+  // Model: each string is a damped torsion spring anchored at (cx, oy).
+  //
+  // Cursor "wind" torque:
+  //   For a string at angle θ, the unit vector along it (screen space, y-down) is
+  //   (cos θ, −sin θ).  The perpendicular direction is (sin θ,  cos θ).
+  //   The component of cursor velocity along that perpendicular is:
+  //     perpSpeed = vx·sin θ + vy·cos θ   (vy positive = cursor moving down)
+  //   A rightward cursor (vx > 0) exerts negative torque on an upward string (θ=π/2),
+  //   tipping its endpoint to the right (decreasing θ), hence the minus sign:
+  //     windAlpha = −perpSpeed · influence · armFrac · WIND_STRENGTH
+  //
+  function updatePhysics(dt, vx, vy) {
+    const R2inv    = 1 / (2 * INFLUENCE_R * INFLUENCE_R);
+    const hasMouse = mx > -9000;
+
+    for (const r of rays) {
+      // ── Cursor wind ────────────────────────────────────────────────────────
+      let windAlpha = 0;
+
+      if (hasMouse) {
+        const cosA = Math.cos(r.angle);
+        const sinA = Math.sin(r.angle);
+
+        // String unit vector in screen space (x right, y down)
+        const sdx =  cosA;
+        const sdy = -sinA;
+
+        // Project (origin→cursor) onto string to find closest point
+        const ocx  = mx - cx;
+        const ocy  = my - oy;
+        const proj = ocx * sdx + ocy * sdy;
+        const t    = Math.max(0, Math.min(1, proj / r.len));
+
+        const cpx = cx + t * r.len * sdx;
+        const cpy = oy + t * r.len * sdy;
+        const dd  = (mx - cpx) ** 2 + (my - cpy) ** 2;
+
+        const influence = Math.exp(-dd * R2inv);
+
+        if (influence > 1e-4) {
+          const perpSpeed = vx * sinA + vy * cosA;
+          windAlpha = -perpSpeed * influence * t * WIND_STRENGTH;
+        }
+      }
+
+      // ── Spring + damping ────────────────────────────────────────────────────
+      const delta       = r.angle - r.restAngle;
+      const springAlpha = -K_SPRING * delta;
+      const dampAlpha   = -K_DAMP   * r.omega;
+
+      r.omega += (springAlpha + dampAlpha + windAlpha) * dt;
+      r.angle += r.omega * dt;
+
+      // Hard clamp: deflection ≤ MAX_DELTA, with partial elastic bounce at the rail
+      const newDelta = r.angle - r.restAngle;
+      if (Math.abs(newDelta) > MAX_DELTA) {
+        r.angle  = r.restAngle + Math.sign(newDelta) * MAX_DELTA;
+        r.omega *= -0.2;
+      }
+    }
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+  function render() {
+    ctx.clearRect(0, 0, W, H);
+    drawBackground();
+
+    for (const r of rays) {
+      const ex = cx + r.len * Math.cos(r.angle);
+      const ey = oy - r.len * Math.sin(r.angle);
+
+      ctx.strokeStyle = `rgba(${LINE_RGB},${r.lineAlpha.toFixed(3)})`;
+      ctx.lineWidth   = 0.85;
+      ctx.beginPath();
+      ctx.moveTo(cx, oy);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+
+      const dotA = Math.min(1, r.lineAlpha + 0.18);
+      ctx.fillStyle = `rgba(${DOT_RGB},${dotA.toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(ex, ey, r.dotR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // ── Loop ──────────────────────────────────────────────────────────────────────
+  function animate(ts) {
+    const dt = lastFrameTime
+      ? Math.min((ts - lastFrameTime) / 1000, 0.05)
+      : 0.016;
+    lastFrameTime = ts;
+
+    // Decay smoothed velocity when mouse is idle (time constant ≈ 80 ms)
+    const decay = Math.exp(-12 * dt);
+    svx *= decay;
+    svy *= decay;
+
+    updatePhysics(dt, svx, svy);
+    render();
+    requestAnimationFrame(animate);
+  }
+
+  // ── Mouse tracking ────────────────────────────────────────────────────────────
+  // Velocity is computed per-event with real elapsed time, then EMA-smoothed.
+  // A MAX_VEL cap prevents transient spikes (e.g. sudden large jump on first move).
+  window.addEventListener('mousemove', e => {
+    const now = performance.now() / 1000;
+    const elapsed = now - lastMt;
+
+    if (mx > -9000 && elapsed > 0.001) {
+      const clamp = v => Math.max(-MAX_VEL, Math.min(MAX_VEL, v));
+      const rawVx = clamp((e.clientX - mx) / elapsed);
+      const rawVy = clamp((e.clientY - my) / elapsed);
+      // EMA α=0.35 — smooth but responsive
+      svx += (rawVx - svx) * 0.35;
+      svy += (rawVy - svy) * 0.35;
+    }
+
+    mx    = e.clientX;
+    my    = e.clientY;
+    lastMt = now;
+  });
+
+  window.addEventListener('resize', init);
+
+  // ── Boot ──────────────────────────────────────────────────────────────────────
+  init();
+  requestAnimationFrame(animate);
+</script>
+</body>
+</html>
