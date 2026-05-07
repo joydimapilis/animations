@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Animation 10 Recreation</title>
+  <style>
+    :root {
+      --ink: #080d15;
+      --muted: #5f6975;
+      --line: #ecf0f5;
+      --panel: rgba(255, 255, 255, 0.94);
+      --soft-blue: #e9f0f8;
+      --pink: #e34f9e;
+      --violet: #9c63c7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #fff;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      cursor: default;
+    }
+
+    .stage {
+      position: relative;
+      width: min(100vw, 69vh);
+      height: min(100vh, 145vw);
+      max-width: 828px;
+      max-height: 1200px;
+      min-width: 320px;
+      min-height: 464px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(236, 247, 255, 0.58), transparent 34%),
+        linear-gradient(180deg, #fff 0%, #fff 78%, #fbfdff 100%);
+      isolation: isolate;
+    }
+
+    .stage::before,
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.28;
+      background:
+        linear-gradient(90deg, rgba(198, 216, 231, 0.7) 1px, transparent 1px) 0 0 / 50% 100%,
+        linear-gradient(180deg, rgba(198, 216, 231, 0.38) 1px, transparent 1px) 0 0 / 100% 50%;
+      mix-blend-mode: multiply;
+    }
+
+    .stage::after {
+      opacity: 0.22;
+      background: radial-gradient(circle at 51% 43%, transparent 0 35%, rgba(255, 239, 249, 0.5) 35% 52%, transparent 53%);
+    }
+
+    #particle-ring {
+      position: absolute;
+      inset: -7% -13% 15%;
+      z-index: 1;
+      width: 126%;
+      height: 92%;
+      filter: saturate(1.08);
+      animation: canvasDrift 7.65s cubic-bezier(.42, 0, .58, 1) infinite;
+    }
+
+    .scene {
+      position: absolute;
+      z-index: 2;
+      left: 50%;
+      top: 15.8%;
+      width: min(66.7%, 552px);
+      transform: translateX(-50%);
+      animation: settle 7.65s ease-in-out infinite;
+    }
+
+    .chat {
+      width: 82%;
+      min-height: 86px;
+      margin-left: auto;
+      padding: 23px 25px 21px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 1px 1px rgba(13, 23, 35, 0.04), 0 16px 34px rgba(27, 51, 74, 0.055);
+      font-size: clamp(11px, 2.15vw, 20px);
+      font-weight: 620;
+      line-height: 1.36;
+      animation: bubbleOne 7.65s ease-in-out infinite;
+    }
+
+    .chat.answer {
+      width: 93%;
+      margin: 44px auto 0 0;
+      min-height: 102px;
+      padding-top: 23px;
+      animation-name: bubbleTwo;
+    }
+
+    .recommendation {
+      margin-top: 37px;
+      padding: 16px 16px 14px;
+      border-radius: 4px;
+      background: var(--panel);
+      box-shadow: 0 20px 48px rgba(27, 36, 48, 0.11);
+      animation: cardFloat 7.65s cubic-bezier(.42, 0, .58, 1) infinite;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .product {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .image-box {
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1.12;
+      border-bottom: 1px solid #eef2f6;
+      background: #edf3f7;
+    }
+
+    .shirt,
+    .hoodie {
+      position: relative;
+      width: 55%;
+      height: 66%;
+      filter: drop-shadow(0 3px 3px rgba(23, 38, 58, 0.2));
+    }
+
+    .shirt::before {
+      content: "";
+      position: absolute;
+      inset: 18% 19% 0;
+      background: linear-gradient(90deg, #005bb1 0 8%, #086fd4 28%, #0d73d6 72%, #005fb8 100%);
+      clip-path: polygon(0 0, 23% 0, 31% 8%, 69% 8%, 77% 0, 100% 0, 100% 100%, 0 100%);
+      border-radius: 2px 2px 1px 1px;
+    }
+
+    .shirt::after {
+      content: "";
+      position: absolute;
+      top: 18%;
+      left: 0;
+      width: 100%;
+      height: 34%;
+      background: linear-gradient(90deg, #0057a7, #0b70d4 28%, #0d73d6 72%, #0057a7);
+      clip-path: polygon(18% 0, 34% 0, 22% 100%, 0 89%, 7% 43%, 18% 0, 82% 0, 93% 43%, 100% 89%, 78% 100%, 66% 0);
+    }
+
+    .hoodie::before {
+      content: "";
+      position: absolute;
+      inset: 19% 12% 0;
+      background: linear-gradient(90deg, #071021 0%, #111d35 24%, #0b1629 64%, #030712 100%);
+      clip-path: polygon(19% 0, 81% 0, 95% 16%, 100% 100%, 73% 100%, 70% 32%, 30% 32%, 27% 100%, 0 100%, 5% 16%);
+      border-radius: 20% 20% 5% 5%;
+    }
+
+    .hoodie::after {
+      content: "";
+      position: absolute;
+      top: 4%;
+      left: 29%;
+      width: 42%;
+      height: 31%;
+      border-radius: 48% 48% 28% 28%;
+      background: radial-gradient(circle at 50% 100%, #111d35 0 36%, #060d19 37% 100%);
+      box-shadow: inset 0 -7px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .meta {
+      padding: 15px 13px 14px;
+      line-height: 1.22;
+    }
+
+    .title {
+      font-size: clamp(9px, 1.5vw, 14px);
+      font-weight: 700;
+    }
+
+    .variant,
+    .brand {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: clamp(8px, 1.4vw, 13px);
+      font-weight: 520;
+    }
+
+    .price {
+      margin-top: 11px;
+      font-size: clamp(10px, 1.6vw, 15px);
+      font-weight: 800;
+    }
+
+    .buy {
+      width: 100%;
+      height: clamp(39px, 6.5vw, 64px);
+      margin-top: 16px;
+      border: 0;
+      border-radius: 4px;
+      background: #e8f0f8;
+      color: #1d4774;
+      font: 650 clamp(11px, 1.7vw, 16px)/1 Inter, ui-sans-serif, system-ui;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease;
+    }
+
+    .buy:hover {
+      background: #dbe9f6;
+      transform: translateY(-1px);
+    }
+
+    @keyframes canvasDrift {
+      0% { transform: translate3d(0, 0, 0) scale(1); opacity: .95; }
+      28% { transform: translate3d(1.2%, -1.1%, 0) scale(1.015); opacity: 1; }
+      52% { transform: translate3d(-1.8%, .3%, 0) scale(1.01); opacity: .96; }
+      78% { transform: translate3d(.9%, -.6%, 0) scale(1.018); opacity: 1; }
+      100% { transform: translate3d(0, 0, 0) scale(1); opacity: .95; }
+    }
+
+    @keyframes settle {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(4px); }
+    }
+
+    @keyframes bubbleOne {
+      0%, 100% { transform: translateX(0); }
+      35% { transform: translateX(3px); }
+      68% { transform: translateX(-2px); }
+    }
+
+    @keyframes bubbleTwo {
+      0%, 100% { transform: translateX(0); }
+      38% { transform: translateX(-3px); }
+      70% { transform: translateX(2px); }
+    }
+
+    @keyframes cardFloat {
+      0%, 100% { transform: translateY(0); }
+      45% { transform: translateY(5px); }
+      75% { transform: translateY(1px); }
+    }
+
+    @media (max-width: 520px) {
+      .scene {
+        width: 67%;
+        top: 16.3%;
+      }
+
+      .chat {
+        padding: 15px 16px 14px;
+        min-height: 66px;
+      }
+
+      .chat.answer {
+        margin-top: 27px;
+        min-height: 78px;
+      }
+
+      .recommendation {
+        margin-top: 27px;
+        padding: 10px;
+      }
+
+      .products {
+        gap: 9px;
+      }
+
+      .meta {
+        padding: 10px 8px 9px;
+      }
+
+      .price {
+        margin-top: 7px;
+      }
+
+      .buy {
+        margin-top: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="Recreated shopping recommendation animation">
+    <canvas id="particle-ring"></canvas>
+    <section class="scene" aria-label="Product recommendation chat">
+      <div class="chat">I'm refreshing my wardrobe. Can you recommend some cozy, comfortable basics in size M?</div>
+      <div class="chat answer">Absolutely. Here are a few comfy essentials that pair well and could be a good starting point:</div>
+
+      <div class="recommendation">
+        <div class="products">
+          <article class="product">
+            <div class="image-box"><div class="shirt" aria-hidden="true"></div></div>
+            <div class="meta">
+              <div class="title">Deluxe Shirt</div>
+              <div class="variant">Blue - Medium</div>
+              <div class="price">$26.00</div>
+              <div class="brand">Cartsy</div>
+            </div>
+          </article>
+
+          <article class="product">
+            <div class="image-box"><div class="hoodie" aria-hidden="true"></div></div>
+            <div class="meta">
+              <div class="title">Essential Hoodie</div>
+              <div class="variant">Navy - Medium</div>
+              <div class="price">$48.00</div>
+              <div class="brand">Cartsy</div>
+            </div>
+          </article>
+        </div>
+        <button class="buy" type="button">Buy now</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById('particle-ring');
+      const stage = document.querySelector('.stage');
+      const ctx = canvas.getContext('2d');
+      const particles = [];
+      const pointer = {
+        x: -9999,
+        y: -9999,
+        px: -9999,
+        py: -9999,
+        vx: 0,
+        vy: 0,
+        active: false
+      };
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      let last = performance.now();
+      let autoBurstAt = 0;
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = rect.width;
+        height = rect.height;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        seedParticles();
+      }
+
+      function seedParticles() {
+        particles.length = 0;
+        const count = Math.max(900, Math.round(width * height / 850));
+        const cx = width * 0.5;
+        const cy = height * 0.46;
+        const rx = width * 0.405;
+        const ry = height * 0.315;
+
+        for (let i = 0; i < count; i += 1) {
+          const angle = Math.random() * Math.PI * 2;
+          const band = 1 + (Math.random() - 0.5) * 0.34;
+          const noise = (Math.random() - 0.5) * 24;
+          const x = cx + Math.cos(angle) * (rx * band + noise);
+          const y = cy + Math.sin(angle) * (ry * band + noise);
+          const magenta = Math.random() > 0.38;
+          particles.push({
+            homeX: x,
+            homeY: y,
+            x,
+            y,
+            vx: 0,
+            vy: 0,
+            angle,
+            spin: (Math.random() - 0.5) * 0.0018,
+            size: 0.65 + Math.random() * 1.45,
+            alpha: 0.26 + Math.random() * 0.54,
+            color: magenta ? '226, 67, 149' : '147, 76, 187',
+            delay: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      function burst(x, y, force = 1) {
+        for (const p of particles) {
+          const dx = p.x - x;
+          const dy = p.y - y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 130) {
+            const strength = (1 - dist / 130) * force;
+            const angle = Math.atan2(dy, dx);
+            p.vx += Math.cos(angle) * (8 + Math.random() * 10) * strength;
+            p.vy += Math.sin(angle) * (8 + Math.random() * 10) * strength;
+          }
+        }
+      }
+
+      function updatePointer(x, y) {
+        if (pointer.active) {
+          pointer.vx = pointer.vx * 0.72 + (x - pointer.x) * 0.28;
+          pointer.vy = pointer.vy * 0.72 + (y - pointer.y) * 0.28;
+        }
+
+        pointer.px = pointer.x;
+        pointer.py = pointer.y;
+        pointer.x = x;
+        pointer.y = y;
+        pointer.active = true;
+      }
+
+      function tick(now) {
+        const dt = Math.min((now - last) / 16.666, 2);
+        last = now;
+        ctx.clearRect(0, 0, width, height);
+
+        const t = now * 0.001;
+        const driftX = Math.sin(t * 0.72) * 7;
+        const driftY = Math.cos(t * 0.58) * 5;
+
+        for (const p of particles) {
+          p.angle += p.spin * dt;
+          const orbitX = Math.cos(p.angle) * 3.6 + driftX;
+          const orbitY = Math.sin(p.angle * 1.1) * 2.8 + driftY;
+          const tx = p.homeX + orbitX;
+          const ty = p.homeY + orbitY;
+
+          let linePull = 0;
+
+          if (pointer.active) {
+            const homeDx = p.homeX - pointer.x;
+            const homeDy = p.homeY - pointer.y;
+            const homeDist = Math.hypot(homeDx, homeDy);
+
+            if (homeDist < 142) {
+              const speed = Math.hypot(pointer.vx, pointer.vy);
+              let lineX = pointer.vx;
+              let lineY = pointer.vy;
+
+              if (speed < 0.35) {
+                lineX = pointer.x - width * 0.5;
+                lineY = pointer.y - height * 0.46;
+              }
+
+              const lineLen = Math.hypot(lineX, lineY) || 1;
+              lineX /= lineLen;
+              lineY /= lineLen;
+
+              const normalX = -lineY;
+              const normalY = lineX;
+              const along = Math.max(-124, Math.min(46, homeDx * lineX + homeDy * lineY));
+              const narrowJitter = Math.sin(p.delay + t * 4.2) * 1.35;
+              const lineTargetX = pointer.x + lineX * along + normalX * narrowJitter;
+              const lineTargetY = pointer.y + lineY * along + normalY * narrowJitter;
+              const pull = Math.pow(1 - homeDist / 142, 1.45);
+
+              linePull = pull;
+              p.vx += (lineTargetX - p.x) * (0.22 * pull) * dt;
+              p.vy += (lineTargetY - p.y) * (0.22 * pull) * dt;
+            }
+          }
+
+          p.vx += (tx - p.x) * 0.014 * dt;
+          p.vy += (ty - p.y) * 0.014 * dt;
+          p.vx *= Math.pow(0.88, dt);
+          p.vy *= Math.pow(0.88, dt);
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+
+          const flicker = 0.82 + Math.sin(t * 2.1 + p.delay) * 0.18;
+          const drawSize = p.size + linePull * 0.55;
+          ctx.fillStyle = `rgba(${p.color}, ${Math.min(0.96, p.alpha * flicker + linePull * 0.22)})`;
+          ctx.fillRect(p.x, p.y, drawSize, drawSize);
+        }
+
+        if (now > autoBurstAt) {
+          const x = width * (0.24 + Math.random() * 0.54);
+          const y = height * (0.24 + Math.random() * 0.42);
+          burst(x, y, 0.42);
+          autoBurstAt = now + 1500 + Math.random() * 1300;
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      canvas.addEventListener('pointermove', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        updatePointer(event.clientX - rect.left, event.clientY - rect.top);
+      });
+
+      canvas.addEventListener('pointerleave', () => {
+        pointer.x = -9999;
+        pointer.y = -9999;
+        pointer.active = false;
+      });
+
+      canvas.addEventListener('pointerenter', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        updatePointer(event.clientX - rect.left, event.clientY - rect.top);
+      });
+
+      canvas.addEventListener('click', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        burst(event.clientX - rect.left, event.clientY - rect.top, 1.8);
+      });
+
+      stage.addEventListener('pointermove', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        if (x >= 0 && y >= 0 && x <= width && y <= height) {
+          updatePointer(x, y);
+        } else {
+          pointer.active = false;
+        }
+      });
+
+      window.addEventListener('resize', resize);
+      resize();
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>

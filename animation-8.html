@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animation 8 - Jackstones</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #eef2fa;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #050505;
+    }
+
+    .frame {
+      position: relative;
+      width: min(100vw, 1429px);
+      aspect-ratio: 2858 / 1530;
+      overflow: hidden;
+      background: #eef2fa;
+    }
+
+    .top-notch {
+      position: absolute;
+      top: -2px;
+      left: 50%;
+      width: 5px;
+      height: 6px;
+      transform: translateX(-50%);
+      border-radius: 0 0 2px 2px;
+      background: #050505;
+      z-index: 3;
+    }
+
+    .viewport {
+      position: absolute;
+      left: 4.2%;
+      right: 5.1%;
+      top: 4.45%;
+      height: 85.25%;
+      overflow: hidden;
+      border-radius: 18px;
+      background: #151113;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .label {
+      position: absolute;
+      left: 50%;
+      bottom: 6.2%;
+      transform: translateX(-50%);
+      font-size: clamp(9px, 0.82vw, 12px);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .plus {
+      position: absolute;
+      bottom: 5.9%;
+      width: 16px;
+      height: 16px;
+    }
+
+    .plus::before,
+    .plus::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 15px;
+      height: 2px;
+      border-radius: 99px;
+      background: #050505;
+      transform: translate(-50%, -50%);
+    }
+
+    .plus::after {
+      width: 2px;
+      height: 15px;
+    }
+
+    .p1 { left: 4.2%; }
+    .p2 { left: 34%; }
+    .p3 { left: 64.2%; }
+    .p4 { right: 4.8%; }
+  </style>
+</head>
+<body>
+  <main class="frame" aria-label="Interactive glossy jackstone pile">
+    <div class="top-notch"></div>
+    <section class="viewport">
+      <canvas id="scene"></canvas>
+    </section>
+    <div class="plus p1"></div>
+    <div class="plus p2"></div>
+    <div class="plus p3"></div>
+    <div class="plus p4"></div>
+    <div class="label">SCROLL TO EXPLORE</div>
+  </main>
+
+  <script>
+    (() => {
+      const viewport = document.querySelector('.viewport');
+      const canvas = document.getElementById('scene');
+      const ctx = canvas.getContext('2d', { alpha: false });
+      const palette = {
+        red: [190, 0, 16],
+        blue: [20, 82, 210],
+        yellow: [230, 190, 0],
+        green: [30, 165, 62],
+        white: [226, 226, 222],
+        black: [6, 6, 7],
+        gray: [118, 115, 112]
+      };
+      const clickColors = ['red', 'blue', 'yellow', 'green'];
+
+      let w = 0;
+      let h = 0;
+      let dpr = 1;
+      let raf = 0;
+      let pointer = { x: -9999, y: -9999, active: false };
+      let colorStep = 0;
+      let lastBurst = 0;
+
+      const jacks = [
+        { x: .04, y: .58, s: 1.32, r: -0.22, c: 'white', z: 8 },
+        { x: .31, y: .60, s: .98, r: -0.74, c: 'red', z: 7 },
+        { x: .41, y: .50, s: 1.18, r: 0.24, c: 'white', z: 16 },
+        { x: .63, y: .55, s: 1.22, r: 0.34, c: 'red', z: 18 },
+        { x: .91, y: .33, s: 1.32, r: 0.4, c: 'black', z: 6 },
+        { x: .08, y: .92, s: 1.32, r: 0.34, c: 'red', z: 19 },
+        { x: .44, y: .88, s: 1.06, r: 0.8, c: 'black', z: 22 },
+        { x: .61, y: .88, s: 1.26, r: -0.16, c: 'white', z: 24 },
+        { x: .96, y: .82, s: 1.28, r: -0.36, c: 'red', z: 21 },
+        { x: .47, y: .18, s: .96, r: -0.5, c: 'black', z: 4 },
+        { x: .72, y: .18, s: 1.16, r: -0.28, c: 'white', z: 9 }
+      ].map((j, i) => ({
+        ...j,
+        recolor: j.c === 'red',
+        ox: 0,
+        oy: 0,
+        vx: 0,
+        vy: 0,
+        spin: 0,
+        lift: 0,
+        force: 0,
+        mass: .75 + (i % 5) * .13
+      })).sort((a, b) => a.z - b.z);
+
+      function resize() {
+        const rect = viewport.getBoundingClientRect();
+        w = rect.width;
+        h = rect.height;
+        dpr = 1;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        draw();
+      }
+
+      function rgb(c, a = 1) {
+        return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${a})`;
+      }
+
+      function mix(c, amt) {
+        if (amt >= 0) return c.map(v => Math.round(v + (255 - v) * amt));
+        return c.map(v => Math.round(v * (1 + amt)));
+      }
+
+      function roundedCapsule(x, y, len, thick) {
+        const r = thick / 2;
+        ctx.beginPath();
+        ctx.moveTo(x - len / 2 + r, y - r);
+        ctx.lineTo(x + len / 2 - r, y - r);
+        ctx.quadraticCurveTo(x + len / 2, y - r, x + len / 2, y);
+        ctx.quadraticCurveTo(x + len / 2, y + r, x + len / 2 - r, y + r);
+        ctx.lineTo(x - len / 2 + r, y + r);
+        ctx.quadraticCurveTo(x - len / 2, y + r, x - len / 2, y);
+        ctx.quadraticCurveTo(x - len / 2, y - r, x - len / 2 + r, y - r);
+        ctx.closePath();
+      }
+
+      function drawEnd(x, y, angle, thick, color, side, depth) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.scale(.82 + depth * .12, 1);
+
+        const endGrad = ctx.createRadialGradient(-thick * .18, -thick * .2, 2, 0, 0, thick * .58);
+        endGrad.addColorStop(0, rgb(mix(color, .34)));
+        endGrad.addColorStop(.58, rgb(color));
+        endGrad.addColorStop(1, rgb(mix(color, -.32)));
+        ctx.fillStyle = endGrad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, thick * .52, thick * .46, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(0, 0, 0, .58)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, thick * .16, thick * .18, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = side < 0 ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.16)';
+        ctx.lineWidth = Math.max(1, thick * .035);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, thick * .51, thick * .45, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawTube(len, thick, angle, color, force, depth) {
+        ctx.save();
+        ctx.rotate(angle);
+        ctx.translate(force * 18 * depth, 0);
+
+        const grad = ctx.createLinearGradient(0, -thick / 2, 0, thick / 2);
+        grad.addColorStop(0, rgb(mix(color, .38)));
+        grad.addColorStop(.22, rgb(mix(color, .12)));
+        grad.addColorStop(.57, rgb(color));
+        grad.addColorStop(1, rgb(mix(color, -.5)));
+        roundedCapsule(0, 0, len, thick);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255,255,255,.13)';
+        ctx.lineWidth = Math.max(1, thick * .025);
+        ctx.stroke();
+
+        ctx.globalAlpha = color === palette.black ? .62 : .72;
+        ctx.fillStyle = 'rgba(255,255,255,.72)';
+        roundedCapsule(-len * .19, -thick * .28, len * .23, thick * .08);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        drawEnd(-len / 2, 0, 0, thick, color, -1, depth);
+        drawEnd(len / 2, 0, 0, thick, color, 1, depth);
+        ctx.restore();
+      }
+
+      function drawCenterBlend(thick, color) {
+        ctx.save();
+        ctx.globalAlpha = .94;
+        ctx.filter = 'blur(5px)';
+        const blend = ctx.createRadialGradient(-thick * .12, -thick * .16, 1, 0, 0, thick * .9);
+        blend.addColorStop(0, rgb(mix(color, .28)));
+        blend.addColorStop(.5, rgb(color));
+        blend.addColorStop(1, rgb(mix(color, -.28), .2));
+        ctx.fillStyle = blend;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, thick * .56, thick * .48, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawJack(j) {
+        const base = Math.min(w, h) * .31 * j.s;
+        const len = base * 1.08;
+        const thick = base * .42;
+        const x = j.x * w + j.ox;
+        const y = j.y * h + j.oy - j.lift;
+        const color = palette[j.c];
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(j.r + j.spin);
+
+        ctx.save();
+        ctx.rotate(-j.r - j.spin);
+        ctx.fillStyle = 'rgba(0,0,0,.34)';
+        ctx.filter = 'blur(5px)';
+        ctx.beginPath();
+        ctx.ellipse(8, base * .28, base * .85, base * .27, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.filter = 'none';
+        ctx.restore();
+
+        ctx.shadowColor = 'rgba(0,0,0,.45)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 6;
+
+        drawTube(len * .95, thick * .98, Math.PI / 2, color, j.force, .85);
+        drawTube(len * .88, thick * .94, -Math.PI / 4, color, j.force, 1.05);
+        drawCenterBlend(thick, color);
+        drawTube(len, thick, 0, color, j.force, 1);
+
+        ctx.shadowColor = 'transparent';
+        const core = ctx.createRadialGradient(-thick * .2, -thick * .25, 1, 0, 0, thick * .72);
+        core.addColorStop(0, rgb(mix(color, .42)));
+        core.addColorStop(.55, rgb(color));
+        core.addColorStop(1, rgb(mix(color, -.35)));
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, thick * .5, thick * .45, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(255,255,255,.38)';
+        ctx.beginPath();
+        ctx.ellipse(-thick * .18, -thick * .23, thick * .16, thick * .08, -.45, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawBackground() {
+        const bg = ctx.createLinearGradient(0, 0, w, h);
+        bg.addColorStop(0, '#171214');
+        bg.addColorStop(.48, '#211719');
+        bg.addColorStop(1, '#0c0b0d');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, w, h);
+
+        const glow = ctx.createRadialGradient(w * .5, h * .68, 0, w * .5, h * .68, h * .7);
+        glow.addColorStop(0, 'rgba(255,255,255,.12)');
+        glow.addColorStop(.36, 'rgba(255,255,255,.04)');
+        glow.addColorStop(1, 'rgba(0,0,0,.36)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      function draw() {
+        drawBackground();
+        for (const jack of jacks) drawJack(jack);
+      }
+
+      function step() {
+        let moving = false;
+        const radius = Math.min(w, h) * .34;
+
+        for (const jack of jacks) {
+          const x = jack.x * w + jack.ox;
+          const y = jack.y * h + jack.oy;
+          const dx = x - pointer.x;
+          const dy = y - pointer.y;
+          const distance = Math.hypot(dx, dy);
+          const near = pointer.active ? Math.max(0, 1 - distance / radius) : 0;
+          const impulse = near * near;
+
+          if (impulse > 0) {
+            const angle = Math.atan2(dy || -1, dx || 1);
+            const turbulence = Math.sin(jack.z * 2.17 + pointer.x * .01) * .75;
+            jack.vx += (Math.cos(angle) * 20 + turbulence * 8) * impulse / jack.mass;
+            jack.vy += (Math.sin(angle) * 17 - 10 - turbulence * 5) * impulse / jack.mass;
+            jack.spin += (x > pointer.x ? 1 : -1) * impulse * .24 + turbulence * impulse * .05;
+            jack.lift += impulse * 16;
+          }
+
+          jack.vx += -jack.ox * .026;
+          jack.vy += -jack.oy * .026;
+          jack.vx *= .8;
+          jack.vy *= .8;
+          jack.ox += jack.vx;
+          jack.oy += jack.vy;
+          jack.spin *= .83;
+          jack.lift *= .82;
+          jack.force += (impulse - jack.force) * .4;
+
+          if (Math.abs(jack.ox) > .2 || Math.abs(jack.oy) > .2 || Math.abs(jack.vx) > .05 || Math.abs(jack.vy) > .05 || Math.abs(jack.spin) > .001 || jack.force > .004) {
+            moving = true;
+          }
+        }
+
+        draw();
+        raf = moving ? requestAnimationFrame(step) : 0;
+      }
+
+      function wake() {
+        if (!raf) raf = requestAnimationFrame(step);
+      }
+
+      function burst(x, y, strength = 1) {
+        const now = performance.now();
+        if (now - lastBurst < 85) return;
+        lastBurst = now;
+        const radius = Math.min(w, h) * .42;
+        for (const jack of jacks) {
+          const jx = jack.x * w + jack.ox;
+          const jy = jack.y * h + jack.oy;
+          const dx = jx - x;
+          const dy = jy - y;
+          const distance = Math.hypot(dx, dy);
+          if (distance > radius) continue;
+          const power = Math.pow(1 - distance / radius, 2.2) * strength;
+          const angle = Math.atan2(dy || -1, dx || 1);
+          const spray = Math.sin((jack.z + 3) * 3.9 + x * .02 + y * .01);
+          jack.vx += (Math.cos(angle) * 72 + spray * 24) * power / jack.mass;
+          jack.vy += (Math.sin(angle) * 54 - 34 - spray * 12) * power / jack.mass;
+          jack.spin += ((jx > x ? 1 : -1) * .68 + spray * .18) * power;
+          jack.lift += 72 * power;
+          jack.force = Math.max(jack.force, Math.min(1, power * 1.4));
+        }
+        wake();
+      }
+
+      viewport.addEventListener('pointermove', (event) => {
+        const rect = viewport.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        pointer = {
+          x,
+          y,
+          active: true
+        };
+        for (const jack of jacks) {
+          const jx = jack.x * w + jack.ox;
+          const jy = jack.y * h + jack.oy;
+          if (Math.hypot(jx - x, jy - y) < Math.min(w, h) * .2) {
+            burst(x, y, .82);
+            break;
+          }
+        }
+        wake();
+      }, { passive: true });
+
+      viewport.addEventListener('pointerleave', () => {
+        pointer.active = false;
+        wake();
+      });
+
+      viewport.addEventListener('pointerdown', (event) => {
+        const rect = viewport.getBoundingClientRect();
+        pointer = {
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top,
+          active: true
+        };
+        colorStep = (colorStep + 1) % clickColors.length;
+        for (const jack of jacks) {
+          if (jack.recolor) jack.c = clickColors[colorStep];
+        }
+        lastBurst = 0;
+        burst(pointer.x, pointer.y, 1.25);
+        wake();
+      });
+
+      window.addEventListener('resize', resize, { passive: true });
+      resize();
+    })();
+  </script>
+</body>
+</html>
