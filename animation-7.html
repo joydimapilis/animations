@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Animation 7 Recreation</title>
+  <style>
+    :root {
+      --duration: 28.269s;
+      --bg: #090f28;
+      --ink: #0b1230;
+      --orange: #ff805d;
+      --rose: #ff4fa4;
+      --violet: #8c22ff;
+      --purple: #5d18de;
+      --blueviolet: #3a168f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .viewport {
+      width: 100vw;
+      height: min(100vh, 29.125vw);
+      min-height: 260px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(1050px 430px at 45% 65%, rgba(30, 20, 72, 0.3), transparent 70%),
+        linear-gradient(180deg, #091027 0%, #091026 46%, #090f24 100%);
+      isolation: isolate;
+    }
+
+    .stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      animation: stage-drift 16s ease-in-out infinite;
+      transform-origin: 54% 52%;
+    }
+
+    svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .phase {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: 50% 55%;
+      mix-blend-mode: screen;
+    }
+
+    .phase path {
+      fill: none;
+      vector-effect: non-scaling-stroke;
+      stroke-linecap: round;
+      stroke-width: 1.22;
+      opacity: .72;
+      filter: drop-shadow(0 0 2px rgba(177, 52, 255, .28));
+    }
+
+    .phase-1 { animation: phase-one var(--duration) linear infinite; }
+    .phase-2 { animation: phase-two var(--duration) linear infinite; }
+    .phase-3 { animation: phase-three var(--duration) linear infinite; }
+    .phase-4 { animation: phase-four var(--duration) linear infinite; }
+
+    .fan path {
+      stroke-width: 1.08;
+      opacity: .62;
+      filter: drop-shadow(0 0 2px rgba(143, 30, 255, .32));
+    }
+
+    .backwash path {
+      stroke-width: .82;
+      opacity: .22;
+      filter: none;
+    }
+
+    .crease path {
+      stroke-width: 1.48;
+      opacity: .82;
+      filter: drop-shadow(0 0 4px rgba(255, 96, 184, .42));
+    }
+
+    .haze {
+      position: absolute;
+      inset: -14% -6%;
+      z-index: 2;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: .85;
+    }
+
+    .glow {
+      position: absolute;
+      width: 26vw;
+      aspect-ratio: 1 / .42;
+      border-radius: 50%;
+      filter: blur(18px);
+      opacity: .58;
+      transform: translate(-50%, -50%);
+    }
+
+    .glow-a {
+      left: 27%;
+      top: 54%;
+      background: radial-gradient(ellipse, rgba(255, 104, 75, .72), rgba(229, 42, 202, .32) 42%, transparent 70%);
+      animation: glow-a var(--duration) cubic-bezier(.42, 0, .2, 1) infinite;
+    }
+
+    .glow-b {
+      left: 50%;
+      top: 37%;
+      background: radial-gradient(ellipse, rgba(186, 36, 255, .72), rgba(109, 24, 237, .36) 45%, transparent 72%);
+      animation: glow-b var(--duration) cubic-bezier(.32, 0, .24, 1) infinite;
+    }
+
+    .glow-c {
+      left: 73%;
+      top: 38%;
+      width: 38vw;
+      background: radial-gradient(ellipse, rgba(149, 38, 255, .44), rgba(95, 24, 216, .22) 48%, transparent 74%);
+      animation: glow-c var(--duration) cubic-bezier(.32, 0, .24, 1) infinite;
+    }
+
+    .comet {
+      position: absolute;
+      z-index: 3;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      box-shadow:
+        0 0 8px 3px rgba(255, 157, 98, .5),
+        0 0 24px 10px rgba(230, 55, 219, .3);
+      offset-rotate: 0deg;
+      opacity: 0;
+    }
+
+    .comet-one {
+      offset-path: path("M -70 421 C 250 352, 435 360, 565 361 C 830 362, 1190 444, 1960 510");
+      animation: comet-one var(--duration) cubic-bezier(.39, 0, .18, 1) infinite;
+    }
+
+    .comet-two {
+      width: 18px;
+      height: 18px;
+      offset-path: path("M 515 360 C 795 310, 1070 205, 1395 118 C 1645 50, 1900 35, 2280 58");
+      animation: comet-two var(--duration) cubic-bezier(.39, 0, .18, 1) infinite;
+      box-shadow:
+        0 0 12px 5px rgba(184, 48, 255, .52),
+        0 0 38px 16px rgba(131, 26, 235, .32);
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(9, 15, 40, .58), transparent 16%, transparent 84%, rgba(9, 15, 40, .5)),
+        linear-gradient(180deg, rgba(9, 15, 40, .35), transparent 24%, transparent 76%, rgba(9, 15, 40, .35));
+    }
+
+    @keyframes stage-drift {
+      0%, 100% { transform: translateX(-.8%) translateY(.4%) scale(1.015); }
+      33% { transform: translateX(.4%) translateY(-.6%) scale(1.025); }
+      67% { transform: translateX(-1.5%) translateY(.2%) scale(1.02); }
+    }
+
+    @keyframes phase-one {
+      0%, 100% { opacity: 1; transform: translateX(-.4%) scaleY(1); }
+    }
+
+    @keyframes phase-two {
+      0%, 100% { opacity: .34; transform: translateX(-.8%) translateY(.2%) scaleY(1.01); }
+    }
+
+    @keyframes phase-three {
+      0%, 100% { opacity: .18; transform: translateX(-1.2%) translateY(.7%) scaleY(.98); }
+    }
+
+    @keyframes phase-four {
+      0%, 100% { opacity: .22; transform: translateX(.4%) translateY(-.4%) scaleY(1.02); }
+    }
+
+    @keyframes glow-a {
+      0%, 100% { transform: translate(-50%, -50%) translate(-17vw, 1vw) scale(.75); opacity: .5; }
+      20% { transform: translate(-50%, -50%) translate(-5vw, 0) scale(.82); opacity: .62; }
+      44% { transform: translate(-50%, -50%) translate(7vw, 1.3vw) scale(.7); opacity: .35; }
+      70% { transform: translate(-50%, -50%) translate(-19vw, 2.4vw) scale(.52); opacity: .22; }
+    }
+
+    @keyframes glow-b {
+      0% { transform: translate(-50%, -50%) translate(-4vw, 7vw) rotate(-12deg) scale(.65); opacity: .38; }
+      18% { transform: translate(-50%, -50%) translate(1vw, 3vw) rotate(-10deg) scale(.82); opacity: .62; }
+      42% { transform: translate(-50%, -50%) translate(12vw, .8vw) rotate(-7deg) scale(1.02); opacity: .72; }
+      68% { transform: translate(-50%, -50%) translate(18vw, -.6vw) rotate(0deg) scale(.88); opacity: .52; }
+      100% { transform: translate(-50%, -50%) translate(-4vw, 7vw) rotate(-12deg) scale(.65); opacity: .38; }
+    }
+
+    @keyframes glow-c {
+      0%, 100% { transform: translate(-50%, -50%) translate(13vw, -6vw) rotate(-6deg) scale(.8); opacity: .22; }
+      28% { transform: translate(-50%, -50%) translate(6vw, -3vw) rotate(-4deg) scale(1.04); opacity: .36; }
+      56% { transform: translate(-50%, -50%) translate(-2vw, 1vw) rotate(2deg) scale(.95); opacity: .5; }
+      84% { transform: translate(-50%, -50%) translate(10vw, 0) rotate(0deg) scale(1.1); opacity: .42; }
+    }
+
+    @keyframes comet-one {
+      0% { offset-distance: 5%; opacity: 0; transform: scale(.5); }
+      12% { opacity: .72; }
+      38% { offset-distance: 76%; opacity: .55; transform: scale(.9); }
+      48%, 100% { offset-distance: 100%; opacity: 0; transform: scale(.55); }
+    }
+
+    @keyframes comet-two {
+      0%, 20% { offset-distance: 0%; opacity: 0; transform: scale(.45); }
+      34% { opacity: .7; }
+      62% { offset-distance: 64%; opacity: .48; transform: scale(.95); }
+      76%, 100% { offset-distance: 100%; opacity: 0; transform: scale(.4); }
+    }
+  </style>
+</head>
+<body>
+  <main class="viewport" aria-label="Abstract purple and orange wave animation recreation">
+    <div class="stage">
+      <svg viewBox="0 0 2246 688" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="strandWarm" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#fd7459" stop-opacity=".14"/>
+            <stop offset="25%" stop-color="#ff8562" stop-opacity=".78"/>
+            <stop offset="49%" stop-color="#ff4eab" stop-opacity=".86"/>
+            <stop offset="68%" stop-color="#9a29ff" stop-opacity=".84"/>
+            <stop offset="100%" stop-color="#4f1cc9" stop-opacity=".18"/>
+          </linearGradient>
+          <linearGradient id="strandViolet" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#7924ff" stop-opacity=".1"/>
+            <stop offset="34%" stop-color="#bb27ff" stop-opacity=".75"/>
+            <stop offset="62%" stop-color="#8e2cff" stop-opacity=".78"/>
+            <stop offset="100%" stop-color="#37166f" stop-opacity=".08"/>
+          </linearGradient>
+          <linearGradient id="strandBack" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff8a62" stop-opacity=".16"/>
+            <stop offset="48%" stop-color="#9b27ff" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#40177f" stop-opacity=".06"/>
+          </linearGradient>
+        </defs>
+        <g id="phase1" class="phase phase-1"></g>
+        <g id="phase2" class="phase phase-2"></g>
+        <g id="phase3" class="phase phase-3"></g>
+        <g id="phase4" class="phase phase-4"></g>
+      </svg>
+    </div>
+    <div class="haze">
+      <div class="glow glow-a"></div>
+      <div class="glow glow-b"></div>
+      <div class="glow glow-c"></div>
+      <div class="comet comet-one"></div>
+      <div class="comet comet-two"></div>
+    </div>
+    <div class="vignette"></div>
+  </main>
+
+  <script>
+    const SVG_NS = "http://www.w3.org/2000/svg";
+
+    const phases = [
+      { id: "phase1", offset: 0, alpha: 1, y: 0 },
+      { id: "phase2", offset: .018, alpha: .32, y: 18 },
+      { id: "phase3", offset: .043, alpha: .18, y: 36 },
+      { id: "phase4", offset: -.024, alpha: .16, y: -16 }
+    ];
+
+    const foldKeys = [
+      {
+        p: 0,
+        cross: [520, 356],
+        crown: [1085, 138],
+        tail: [2290, 82],
+        lower: [1765, 638],
+        leftArch: 72,
+        spread: 348,
+        fan: 610,
+        bow: 52
+      },
+      {
+        p: .18,
+        cross: [645, 355],
+        crown: [1225, 96],
+        tail: [2290, 132],
+        lower: [1660, 626],
+        leftArch: 96,
+        spread: 382,
+        fan: 570,
+        bow: 34
+      },
+      {
+        p: .36,
+        cross: [910, 358],
+        crown: [1300, 226],
+        tail: [2290, 300],
+        lower: [1540, 594],
+        leftArch: 130,
+        spread: 320,
+        fan: 460,
+        bow: 88
+      },
+      {
+        p: .54,
+        cross: [1220, 360],
+        crown: [1430, 306],
+        tail: [2290, 356],
+        lower: [1510, 560],
+        leftArch: 112,
+        spread: 270,
+        fan: 360,
+        bow: 116
+      },
+      {
+        p: .72,
+        cross: [560, 356],
+        crown: [1140, 158],
+        tail: [2290, 138],
+        lower: [1720, 632],
+        leftArch: 66,
+        spread: 350,
+        fan: 575,
+        bow: 44
+      },
+      {
+        p: 1,
+        cross: [520, 356],
+        crown: [1085, 138],
+        tail: [2290, 82],
+        lower: [1765, 638],
+        leftArch: 72,
+        spread: 348,
+        fan: 610,
+        bow: 52
+      }
+    ];
+
+    function makePath(d, gradient, width = 1, opacity = 1) {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", `url(#${gradient})`);
+      path.style.strokeWidth = width;
+      path.style.opacity = opacity;
+      return path;
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function ease(t) {
+      return t * t * (3 - 2 * t);
+    }
+
+    function mixPoint(a, b, t) {
+      return [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+    }
+
+    function keyConfig(progress) {
+      let a = foldKeys[0];
+      let b = foldKeys[1];
+      for (let i = 0; i < foldKeys.length - 1; i += 1) {
+        if (progress >= foldKeys[i].p && progress <= foldKeys[i + 1].p) {
+          a = foldKeys[i];
+          b = foldKeys[i + 1];
+          break;
+        }
+      }
+      const local = ease((progress - a.p) / (b.p - a.p));
+      return {
+        cross: mixPoint(a.cross, b.cross, local),
+        crown: mixPoint(a.crown, b.crown, local),
+        tail: mixPoint(a.tail, b.tail, local),
+        lower: mixPoint(a.lower, b.lower, local),
+        leftArch: lerp(a.leftArch, b.leftArch, local),
+        spread: lerp(a.spread, b.spread, local),
+        fan: lerp(a.fan, b.fan, local),
+        bow: lerp(a.bow, b.bow, local)
+      };
+    }
+
+    function clothConfig(phase, seconds) {
+      const duration = 28.269;
+      const progress = ((seconds / duration + phase.offset) % 1 + 1) % 1;
+      const config = keyConfig(progress);
+      const pulse = Math.sin(seconds * 0.72 + phase.offset * 28);
+      const drift = Math.sin(seconds * 0.43 + phase.offset * 17);
+      return {
+        ...config,
+        cross: [config.cross[0] + pulse * 12, config.cross[1] + drift * 9 + phase.y],
+        crown: [config.crown[0] + drift * 26, config.crown[1] + pulse * 18 + phase.y * .14],
+        tail: [config.tail[0], config.tail[1] + drift * 22],
+        lower: [config.lower[0] - pulse * 18, config.lower[1] + drift * 16 + phase.y * .28],
+        phaseShift: phase.offset * Math.PI * 16
+      };
+    }
+
+    function ripple(t, seconds, phaseShift, amount) {
+      return (
+        Math.sin(t * Math.PI * 2.2 + seconds * 1.25 + phaseShift) * amount +
+        Math.sin(t * Math.PI * 5.6 - seconds * 0.74 + phaseShift * 1.7) * amount * .38
+      );
+    }
+
+    function ribbonPath(config, i, total, seconds = 0) {
+      const t = total <= 1 ? 0 : i / (total - 1);
+      const offset = (t - 0.5) * config.spread;
+      const r = ripple(t, seconds, config.phaseShift, 12);
+      const leftY = 410 + offset * 0.36 - Math.sin(t * Math.PI) * config.leftArch + r * .34;
+      const crossY = config.cross[1] + offset * 0.038 + r * .12;
+      const rightY = 450 + offset * 0.55 + r * .82;
+      const c1x = 110 + t * 220;
+      const c1y = leftY - 78 - config.bow * .32 * Math.sin(t * Math.PI);
+      const c2x = config.cross[0] - 255 + t * 72;
+      const c2y = crossY - 8 - offset * 0.18;
+      const c3x = config.cross[0] + 220 + t * 95;
+      const c3y = crossY + 40 - config.bow * .28 + r * .16;
+      const c4x = 1425 + t * 380;
+      const c4y = rightY + 94 + offset * 0.11;
+
+      return [
+        `M -60 ${leftY.toFixed(1)}`,
+        `C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${config.cross[0]} ${crossY.toFixed(1)}`,
+        `C ${c3x.toFixed(1)} ${c3y.toFixed(1)}, ${c4x.toFixed(1)} ${c4y.toFixed(1)}, 2310 ${rightY.toFixed(1)}`
+      ].join(" ");
+    }
+
+    function fanPath(config, i, total, seconds = 0) {
+      const t = total <= 1 ? 0 : i / (total - 1);
+      const offset = (t - 0.5) * config.fan;
+      const r = ripple(t, seconds, config.phaseShift + 1.3, 18);
+      const startX = config.cross[0] - 18 + t * 48;
+      const startY = config.cross[1] + offset * 0.025 + r * .12;
+      const crownX = config.crown[0] + t * 360;
+      const crownY = config.crown[1] + offset * 0.5 + r * .82;
+      const endY = config.tail[1] + offset * 0.58 + r * .82;
+
+      return [
+        `M ${startX.toFixed(1)} ${startY.toFixed(1)}`,
+        `C ${(config.cross[0] + 250 + t * 72).toFixed(1)} ${(startY - 130 - t * 32 + r * .2).toFixed(1)}, ${crownX.toFixed(1)} ${crownY.toFixed(1)}, 2315 ${endY.toFixed(1)}`
+      ].join(" ");
+    }
+
+    function backwashPath(config, i, total, seconds = 0) {
+      const t = total <= 1 ? 0 : i / (total - 1);
+      const offset = (t - 0.5) * 330;
+      const r = ripple(t, seconds, config.phaseShift + 2.6, 15);
+      const startY = config.cross[1] + 44 + offset * 0.12 + r * .22;
+      const endX = config.lower[0] + t * 230;
+      const endY = config.lower[1] - offset * 0.82 + r * .72;
+
+      return [
+        `M ${(config.cross[0] - 90 + t * 80).toFixed(1)} ${startY.toFixed(1)}`,
+        `C ${(config.cross[0] + 80 + t * 120).toFixed(1)} ${(startY + 92).toFixed(1)}, ${(1080 + t * 230).toFixed(1)} ${(endY - 86).toFixed(1)}, ${endX.toFixed(1)} ${endY.toFixed(1)}`
+      ].join(" ");
+    }
+
+    function creasePath(config, i, total, seconds = 0) {
+      const t = total <= 1 ? 0 : i / (total - 1);
+      const lane = (t - 0.5) * 26;
+      const r = ripple(t, seconds, config.phaseShift + 4.1, 6);
+      const leftY = 392 + lane * .8 - config.leftArch * .22 + r;
+      const crossY = config.cross[1] + lane * .18;
+      const endY = 430 + lane * .9;
+
+      return [
+        `M -80 ${leftY.toFixed(1)}`,
+        `C 180 ${(leftY - 52).toFixed(1)}, ${(config.cross[0] - 270).toFixed(1)} ${(crossY - 18).toFixed(1)}, ${config.cross[0].toFixed(1)} ${crossY.toFixed(1)}`,
+        `C ${(config.cross[0] + 315).toFixed(1)} ${(crossY + 20).toFixed(1)}, 1390 ${(endY + 56).toFixed(1)}, 2315 ${(endY + 86).toFixed(1)}`
+      ].join(" ");
+    }
+
+    const animatedPaths = [];
+
+    for (const config of phases) {
+      const group = document.getElementById(config.id);
+
+      const back = document.createElementNS(SVG_NS, "g");
+      back.setAttribute("class", "backwash");
+      for (let i = 0; i < 22; i += 1) {
+        const path = makePath("", "strandBack", 0.72, (0.1 + i / 240) * config.alpha);
+        back.appendChild(path);
+        animatedPaths.push({ path, config, kind: "back", i, total: 22 });
+      }
+      group.appendChild(back);
+
+      const fan = document.createElementNS(SVG_NS, "g");
+      fan.setAttribute("class", "fan");
+      for (let i = 0; i < 38; i += 1) {
+        const path = makePath("", "strandViolet", 1, (0.25 + i / 115) * config.alpha);
+        fan.appendChild(path);
+        animatedPaths.push({ path, config, kind: "fan", i, total: 38 });
+      }
+      group.appendChild(fan);
+
+      const crease = document.createElementNS(SVG_NS, "g");
+      crease.setAttribute("class", "crease");
+      for (let i = 0; i < 5; i += 1) {
+        const path = makePath("", "strandWarm", 1.34, (0.45 + i / 22) * config.alpha);
+        crease.appendChild(path);
+        animatedPaths.push({ path, config, kind: "crease", i, total: 5 });
+      }
+      group.appendChild(crease);
+
+      const ribbon = document.createElementNS(SVG_NS, "g");
+      for (let i = 0; i < 32; i += 1) {
+        const width = i > 11 && i < 22 ? 1.28 : 1.0;
+        const path = makePath("", "strandWarm", width, (0.32 + Math.sin(i / 31 * Math.PI) * 0.42) * config.alpha);
+        ribbon.appendChild(path);
+        animatedPaths.push({ path, config, kind: "ribbon", i, total: 32 });
+      }
+      group.appendChild(ribbon);
+    }
+
+    let startTime = null;
+    let lastFrame = 0;
+    const frameInterval = 1000 / 30;
+
+    function render(now) {
+      if (startTime === null) startTime = now;
+      if (now - lastFrame < frameInterval) {
+        requestAnimationFrame(render);
+        return;
+      }
+      lastFrame = now;
+      const seconds = (now - startTime) / 1000;
+      for (const item of animatedPaths) {
+        const config = clothConfig(item.config, seconds);
+        let d;
+        if (item.kind === "fan") d = fanPath(config, item.i, item.total, seconds);
+        if (item.kind === "ribbon") d = ribbonPath(config, item.i, item.total, seconds);
+        if (item.kind === "back") d = backwashPath(config, item.i, item.total, seconds);
+        if (item.kind === "crease") d = creasePath(config, item.i, item.total, seconds);
+        item.path.setAttribute("d", d);
+      }
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
