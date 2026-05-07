@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animation Showcase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #16161f;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.15);
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-muted: #55556a;
+      --accent: #4A6CF7;
+      --accent-light: #7b96ff;
+      --green: #00cc55;
+      --sans: 'Inter', sans-serif;
+      --serif: 'Instrument Serif', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 64px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-logo {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-logo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent-light);
+      background: rgba(74, 108, 247, 0.12);
+      border: 1px solid rgba(74, 108, 247, 0.2);
+      padding: 4px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero {
+      position: relative;
+      padding: 100px 64px 80px;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(74, 108, 247, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-light);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 5vw, 68px);
+      font-weight: 300;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      max-width: 700px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 em {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent-light);
+    }
+
+    .hero p {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 40px;
+    }
+
+    .hero-stats { display: flex; gap: 40px; }
+    .stat { display: flex; flex-direction: column; gap: 4px; }
+    .stat-number { font-size: 28px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.03em; }
+    .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 64px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .animations-list {
+      padding: 0 64px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .animation-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 600px;
+      transition: border-color 0.3s;
+    }
+
+    .animation-card:hover { border-color: var(--border-hover); }
+    .animation-card:nth-child(even) { direction: rtl; }
+    .animation-card:nth-child(even) > * { direction: ltr; }
+
+    .preview-panel {
+      background: #0d0d10;
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+
+    .animation-card:nth-child(even) .preview-panel {
+      border-right: none;
+      border-left: 1px solid var(--border);
+    }
+
+    .preview-panel iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    .preview-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 70%, rgba(13,13,16,0.4) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .card-chip {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      padding: 5px 12px 5px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .card-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .info-panel {
+      padding: 44px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .info-number { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; }
+    .info-title { font-size: 26px; font-weight: 400; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.25; }
+    .info-title em { font-family: var(--serif); font-style: italic; color: var(--accent-light); }
+
+    .info-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .divider { height: 1px; background: var(--border); }
+    .prompt-section { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+
+    .prompt-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prompt-label::before {
+      content: '';
+      width: 3px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .prompt-box {
+      background: rgba(74, 108, 247, 0.04);
+      border: 1px solid rgba(74, 108, 247, 0.15);
+      border-radius: 12px;
+      padding: 18px 20px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+      max-height: 320px;
+      flex: 1;
+    }
+
+    .prompt-box::-webkit-scrollbar { width: 4px; }
+    .prompt-box::-webkit-scrollbar-track { background: transparent; }
+    .prompt-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .prompt-box strong { color: var(--accent-light); font-weight: 500; }
+
+    .card-actions { display: flex; gap: 10px; align-items: center; margin-top: auto; }
+
+    .view-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-decoration: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 11px 20px;
+      border-radius: 10px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .view-link:hover {
+      background: rgba(74, 108, 247, 0.1);
+      border-color: rgba(74, 108, 247, 0.3);
+      color: var(--accent-light);
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 11px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      font-family: var(--sans);
+    }
+
+    .copy-btn:hover { background: var(--surface2); color: var(--text-primary); }
+    .copy-btn.copied { color: var(--green); border-color: rgba(0,204,85,0.3); background: rgba(0,204,85,0.06); }
+
+    .view-link-arrow { font-size: 14px; transition: transform 0.2s; }
+    .view-link:hover .view-link-arrow { transform: translate(2px, -2px); }
+
+    footer {
+      padding: 40px 64px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p { font-size: 13px; color: var(--text-muted); }
+    footer span { color: var(--accent-light); }
+
+    @media (max-width: 900px) {
+      nav, .hero, .animations-list, .section-label, footer { padding-left: 24px; padding-right: 24px; }
+      .hero { padding-top: 60px; }
+      .animation-card, .animation-card:nth-child(even) { grid-template-columns: 1fr; direction: ltr; min-height: auto; }
+      .preview-panel { height: 280px; border-right: none !important; border-left: none !important; border-bottom: 1px solid var(--border); }
+      .info-panel { padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">
+      <div class="nav-logo-dot"></div>
+      Animation Showcase
+    </div>
+    <span class="nav-badge">6 recreations</span>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-eyebrow">Claude Code · Video Recreation</div>
+    <h1>Video to web, <em>frame by frame.</em></h1>
+    <p>Each animation was analyzed from a source video using Claude Code — extracted, described, and faithfully rebuilt in pure HTML, CSS, and JavaScript. Each prompt is fully reusable — no source video needed.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-number">6</span>
+        <span class="stat-label">Animations</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">HTML</span>
+        <span class="stat-label">Output format</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number">0</span>
+        <span class="stat-label">Dependencies</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-label">Recreations</div>
+
+  <div class="animations-list">
+
+    <!-- Animation 1 -->
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-1" title="Animation 1" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 01</div>
+        <h3 class="info-title">Multi-Agent Typing<br><em>Indicator</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Vanilla JS</span><span class="tag">Looping</span><span class="tag">12s cycle</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Reverse Engineered Prompt</p>
+          <div class="prompt-box" id="prompt-1">Build a looping, dark-themed animation showing three "typing indicator" chat bubbles — each paired with a mouse cursor icon — continuously scrolling upward through a canvas. One bubble at a time is highlighted as "active" (green glow), cycling through all three on a timer.
+
+<strong>Canvas:</strong> 556×598px, background #1a1a1c, border-radius 6px. Page background #111113. Dot grid overlay: radial-gradient dots #2d2d31 at 1.5px, spaced 28px.
+
+<strong>Three agents (large/medium/small):</strong>
+- Agent 0: bubble 176×46px, border-radius 23px, cursor 30×36px, left 298px, scroll delay 0s
+- Agent 1: bubble 148×40px, border-radius 20px, cursor 24×29px, left 148px, scroll delay −4s
+- Agent 2: bubble 108×34px, border-radius 17px, cursor 18×22px, left 248px, scroll delay −8s
+
+<strong>Cursor SVG:</strong> viewBox 0 0 20 24, path M2 1.5L2 19.5L6.8 14.4L10 22L13 20.5L9.8 13L18 13L2 1.5Z, fill rgba(26,26,28,0.88), stroke #787878 at 1.35px.
+
+<strong>Bubble states:</strong>
+- Inactive: border #393939, background #252528
+- Active: border #00cc55, background rgba(0,204,85,0.055), box-shadow glow 22px rgba(0,204,85,0.38)
+- Transition: 0.45s ease-out on all properties
+
+<strong>Dots:</strong> 3 per bubble, 6×6px, delays 0s/0.22s/0.44s.
+- Inactive: #555558, scale 0.88→1.02, opacity 0.42→0.62, 1.15s
+- Active: #00cc55, scale 0.75→1.20, opacity 0.65→1.0, 1.15s
+
+<strong>Scroll:</strong> translateY(635px) → translateY(−140px), 12s linear infinite. JS cycles active class every 4000ms.</div>
+        </div>
+        <div class="card-actions">
+          <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-1" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+          <button class="copy-btn" onclick="copyPrompt('prompt-1', this)">Copy prompt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animation 2 -->
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-2" title="Animation 2" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 02</div>
+        <h3 class="info-title">Holographic Visa<br><em>Card</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Vanilla JS</span><span class="tag">Interactive</span><span class="tag">10s cycle</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Reverse Engineered Prompt</p>
+          <div class="prompt-box" id="prompt-2">Build a single self-contained HTML/CSS/JS file rendering a portrait-format holographic Visa credit card centered on a softly glowing background. The scene loops over a 10-second cycle. The card responds to mouse movement with an interactive 3D tilt effect.
+
+<strong>Canvas:</strong> Body background #fdf4ff (faint lavender). Card: 340×456px, border-radius 22px, box-shadow with diffuse pink glow rgba(170,70,150,0.30) + depth shadow + inset 0.5px white rim.
+
+<strong>Background orbs (3 blurred circles):</strong>
+- Purple 540×540px: radial #c9a8e8→#a070cc, blur 90px, opacity 0.55, animates 12s
+- Coral 420×420px: radial #e8c0a8→#cc9878, blur 90px, opacity 0.50, animates 12s
+- Pink 320×320px: radial #f4cce8→#e0a0d0, blur 90px, opacity 0.40, animates 16s
+
+<strong>Card top 72% — holographic gradient:</strong> 135deg linear cycling hot pink→purple→coral→pink, background-size 200% 200%. Animate background-position 0% 0% → 100% 100% over 10s.
+
+<strong>Card overlays:</strong>
+- Brush texture: repeating diagonal hairlines at 126deg, rgba(255,255,255,0.06), drifts 100px over 10s linear
+- Light streak 1: broad white band sweeps upper-left to lower-right, peak opacity 0.92, ~5.8s then invisible ~4.2s
+- Light streak 2: narrower, delayed 2.2s, peak opacity 0.60
+
+<strong>EMV Chip:</strong> 54×43px at top 30% left 19%, metallic gold gradient, circuit grid lines, center contact pad.
+<strong>NFC icon:</strong> 3 right-facing semicircular SVG arcs at radii 5/9/13, stroke rgba(255,255,255,0.90) at 2.2px.
+<strong>Bottom panel (28%):</strong> White #ffffff, VISA in Times New Roman italic 900 weight, color #1a1f71, right-aligned.
+<strong>Card idle:</strong> cardIdle 10s — gentle rotateX(±2.5°) rotateY(±3.5°) scale(0.975→1.005).
+<strong>Mouse tilt:</strong> On mousemove cancel CSS animation, apply rotateX(−dy×14deg) rotateY(dx×14deg). On mouseleave restore.</div>
+        </div>
+        <div class="card-actions">
+          <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-2" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+          <button class="copy-btn" onclick="copyPrompt('prompt-2', this)">Copy prompt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animation 3 -->
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-3" title="Animation 3" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 03</div>
+        <h3 class="info-title">Stacked Isometric<br><em>Layers</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Vanilla JS</span><span class="tag">Parallax</span><span class="tag">Spring physics</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Reverse Engineered Prompt</p>
+          <div class="prompt-box" id="prompt-3">Build a looping dark animation with three flat isometric-style cards floating in a stacked column, each holding a developer tool logo. Pure black background, no text labels, cursor-reactive parallax with spring physics.
+
+<strong>Canvas:</strong> Page #000000, scene container 500×470px centered. Three cards position: absolute inside scene.
+
+<strong>Card geometry (all three identical):</strong> 418×114px, clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%) diamond/rhombus. Fill #131318. SVG border stroke-width 1.6 with linearGradient from rgba(255,255,255,0.22) top-left to rgba(255,255,255,0.06) bottom-right. Depth shadow: same polygon shifted 10px down, fill rgba(255,255,255,0.032).
+
+<strong>Card positions (top edge):</strong>
+- Top (Webpack): top 25px, left 41px
+- Middle (Copilot): top 176px, left 41px
+- Bottom (Git): top 327px, left 41px
+
+<strong>Icons:</strong>
+- Webpack: two concentric hexagons, outer radius 46 fill #cacaca, inner radius 28 fill #111115
+- Copilot: purple #4e23ec donut ring r=37 stroke-width 13 + cat silhouette with ears and eyes
+- Git: dark-red #8b1f1f rounded rect + branch fork icon with 3 nodes, shapes #111115
+
+<strong>4 animation layers:</strong>
+1. Scene stackFloat: translateY 0→−14→0→14→0px, 9.68s ease-in-out infinite
+2. Top/bottom cards floatOuter: translateY 0→−5→0→5→0px, 4.84s ease-in-out infinite
+3. Middle card floatMid: translateY 0→12→0→−12→0px (inverted), 4.84s ease-in-out infinite
+4. JS cursor parallax: stiffness 180, damping 28, mass 0.8, semi-implicit Euler per rAF frame
+
+<strong>Parallax depth multipliers:</strong> Top ±36.4/23.4px (1.30×), Middle ±28/18px (1.00×), Bottom ±18.2/11.7px (0.65×).</div>
+        </div>
+        <div class="card-actions">
+          <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-3" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+          <button class="copy-btn" onclick="copyPrompt('prompt-3', this)">Copy prompt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animation 4 -->
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-4" title="Animation 4" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 04</div>
+        <h3 class="info-title">Radiating Strings<br><em>Wind Physics</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span><span class="tag">Canvas 2D</span><span class="tag">Vanilla JS</span><span class="tag">Interactive</span><span class="tag">Spring physics</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Reverse Engineered Prompt</p>
+          <div class="prompt-box" id="prompt-4">Build a full-screen interactive Canvas 2D animation. 185 thin lines radiate outward like spokes from a vanishing point anchored just below the bottom-center of the viewport. Each line ends in a small circle. Completely static at rest — strings sway fluidly when the cursor moves nearby, like fingers dragging through tall grass, then spring back once the cursor stops.
+
+<strong>Canvas:</strong> 100% viewport, no scrollbars. Origin point: horizontally centered (W/2), 6px below bottom edge (H+6). Responsive — recalculates on resize.
+
+<strong>Background:</strong> Radial gradient drawn every frame. Inner circle at (cx, H×0.05) radius 0, outer at (cx, H×0.15) radius H×1.35. Stops: #f2f7ff (0%), #e2ecfc (18%), #d0e2f8 (42%), #bdd4f0 (70%), #a8c4e8 (100%).
+
+<strong>185 strings via deterministic LCG PRNG (seed 42):</strong>
+- Angles: sweep π×(0.02 + t×0.96) with ±2.75° jitter — nearly full upper semicircle
+- Lengths: maxLen×(0.22 + rnd()^0.75 × 0.78) — bias toward longer strings
+- Line: 0.85px, rgba(38,55,158,α), opacity 0.38–0.80 per string
+- Dot: radius 1.8–4.0px, rgba(32,46,148,α), opacity lineAlpha+0.18
+
+<strong>Physics (per rAF frame):</strong>
+- Spring: α = −18 × (angle − restAngle)
+- Damping: α += −8.5 × omega (near-critically damped, ~1.0s settle)
+- Wind torque: Gaussian falloff exp(−d²/(2×180²)), perpendicular cursor speed component, tip-weighted by t
+- Euler: omega += totalAlpha × dt, angle += omega × dt, dt capped 50ms
+- Clamp: max deflection ±0.42 rad (≈24°), bounce omega × −0.2
+
+<strong>Cursor velocity:</strong> Computed per mousemove with performance.now(), capped ±1400px/s, EMA smoothed α=0.35, decays exp(−12×dt) when idle.</div>
+        </div>
+        <div class="card-actions">
+          <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-4" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+          <button class="copy-btn" onclick="copyPrompt('prompt-4', this)">Copy prompt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animation 5 -->
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-5" title="Animation 5" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 05</div>
+        <h3 class="info-title">Dual-Row Bar Chart<br><em>Cursor Interaction</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Vanilla JS</span><span class="tag">Interactive</span><span class="tag">Data viz</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Reverse Engineered Prompt</p>
+          <div class="prompt-box" id="prompt-5">Build a cursor-driven data visualization. Two dense rows of narrow vertical bars on a warm off-white canvas, centered on a dark background. Entirely non-animated — all motion is cursor-driven. Moving the cursor reveals a thin orange vertical hairline confined to whichever row the cursor is in. Three purple accent bars act as hover targets revealing dark purple data cards.
+
+<strong>Canvas:</strong> Page background #1a1a1a. Stage 960×272px, background #EDE8E0. Scales responsively: transform: scale(min(vw/960, vh/272)), transform-origin: top left.
+
+<strong>Two rows:</strong>
+- Top row: top: 0, height 146px, bars grow downward (align-items: flex-start)
+- Bottom row: bottom: 0, height 116px, bars grow upward (align-items: flex-end)
+
+<strong>Bar generation (seeded PRNG — mulberry32):</strong>
+- Top row seed 42: width 3–6px, height 55–140px, gap 2–4px
+- Bottom row seed 99: width 3–6px, height 40–110px, gap 2–4px
+- Default bar color #111111, accent (purple) bars #8B6BC4
+
+<strong>3 purple accent bars at fractional positions:</strong>
+- topP1 at 0.33 (~317px), topP2 at 0.66 (~634px) in top row
+- botP1 at 0.22 (~211px) in bottom row
+
+<strong>Cursor hairlines:</strong> width 3px, color #D4705A (orange). Section split at 136px. Top line active when stageY &lt; 136, bottom line when stageY ≥ 136. Fade out after 500ms idle. Transition opacity 0.12s.
+
+<strong>Hover cards (3 total):</strong> background #7B5EA7, font Courier New 8px, width 138px. Cards 1 & 2 anchor top: 10px (top row), Card 3 anchors bottom: 10px (bottom row, scaleY from bottom). Each shows mock heading text + segment bar data rows. Invisible 24px hit zones centered on each purple bar. Animate in: opacity + scaleY 0.18s ease.
+
+<strong>Decorative diagonals:</strong> .diag-tl: 2×76px at top 12px left 98px, rotate(28deg). .diag-br: 2×80px at bottom 14px right 52px, rotate(−22deg). Both #111111.
+
+<strong>No CSS animations</strong> — zero keyframes. Everything cursor-reactive only.</div>
+        </div>
+        <div class="card-actions">
+          <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-5" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+          <button class="copy-btn" onclick="copyPrompt('prompt-5', this)">Copy prompt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Animation 6 -->
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-6" title="Animation 6" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 06</div>
+        <h3 class="info-title">Desktop App<br><em>Upload Scene</em></h3>
+        <div class="info-tags">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Vanilla JS</span><span class="tag">8.28s cycle</span><span class="tag">Clickable</span>
+        </div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Reverse Engineered Prompt</p>
+          <div class="prompt-box" id="prompt-6">Build a single self-contained HTML/CSS/JS file recreating an 8.283s animated desktop-app upload scene. Click to replay. No frameworks, no dependencies.
+
+<strong>Stage:</strong> Body background #101515. Stage aspect ratio 1284/950, width min(100vw, calc(100vh×1.3516)). Background: dark teal vertical gradient #151c1c→#141b1b at 62%→#111616, dotted radial texture rgba(255,255,255,.035) at 18px grid, subtle top-right glow rgba(255,255,255,.05).
+
+<strong>App window (.app):</strong> left 6.75%, right 6.55%, top 28.95%, height 72%. Top bar: height 80px, background #92aaad, border-radius 17px, box-shadow inset highlight. Brand logo: 54×54px, gradient #182022→#263133, aqua circle #67fff2 + lime square #cfff8f inside. Company text "Acme Corp" 29px weight 750 color #15191a.
+
+<strong>Layout:</strong> Grid 82px sidebar + content. Both panels: background #92aaad, border 3px rgba(11,18,18,.9), border-radius 16px 16px 0 0. Sidebar icons 54×54px, Courier New 27px — active icon has rgba(255,255,255,.15) background. Content heading "Customers" 32px weight 800 + "+ ADD SUBSCRIBERS" button.
+
+<strong>Upload drop zone:</strong> left 7%, right 6.2%, top 184px, height 405px. Border 3px dashed #86fff0, border-radius 23px. "DRAG & DROP YOUR FILE" Courier New 25px weight 800. CSS-only cloud icon (3 overlapping circles). Arrow ↑ color #86fff0.
+
+<strong>CSV file icon:</strong> left 70.2%, top 3.65%, width 124px. File card 83×92px, background #dbe9ea. Spreadsheet graphic with green gradient #0d6e36→#17a959→#0d8846, "X" tile, filename "Customers.csv" white 18px weight 800.
+
+<strong>Two CSS cursors</strong> (clip-path polygon): white cursor left 51.6% top 8.3%; black cursor (outlined) left 43.5% top 4.75%.
+
+<strong>Animation keyframes (all 8.283s):</strong>
+- fileMove: cubic-bezier(.2,.75,.22,1) — file travels from top-right diagonally into drop zone, fades out at 75–82%
+- fileName: opacity fades 68%→80%
+- whiteCursor: follows file path, fades at 74–82%
+- blackCursor: appears at 62%, stays visible through end
+- uploadFade: drop zone fades out 69%→79%
+- wash: rgba(188,210,211,.48) overlay pulses in at 72%, fades by 82%
+- tableReveal: customer table blurs in 70%→82%
+- rowIn: 5 rows stagger in with 0.06s delays starting at 5.04s
+
+<strong>Customer table (5 rows):</strong> AALIYAH JOHNSON, DONOVAN MAY, LISA BUEHNER, STEVE TURNER, SAMANTHA RIVERS. Columns: NAME / TYPE / SUBS. / OVERDUE AMT. Tags: RESIDENT (#cfff8f), BUSSINESS (#8fffee). Row background rgba(190,205,207,.56), border-radius 14px.
+
+<strong>Grain overlay:</strong> repeating radial noise rgba(255,255,255,.04), mix-blend-mode soft-light, opacity .25, z-index 10.</div>
+        </div>
+        <div class="card-actions">
+          <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-6" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+          <button class="copy-btn" onclick="copyPrompt('prompt-6', this)">Copy prompt</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Built with <span>Claude Code</span></p>
+    <p>6 animations · HTML / CSS / JS · No dependencies</p>
+  </footer>
+
+  <script>
+    function copyPrompt(id, btn) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy prompt';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+
+</body>
+</html>
