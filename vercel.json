@@ -9,6 +9,7 @@
     { "source": "/animation-7", "destination": "/animation-7.html" },
     { "source": "/animation-8", "destination": "/animation-8.html" },
     { "source": "/animation-9", "destination": "/animation-9.html" },
-    { "source": "/animation-10", "destination": "/animation-10.html" }
+    { "source": "/animation-10", "destination": "/animation-10.html" },
+    { "source": "/animation-11", "destination": "/animation-11.html" }
   ]
 }
