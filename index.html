@@ -125,7 +125,7 @@
 
   <nav>
     <div class="nav-logo"><div class="nav-logo-dot"></div>Animation Showcase</div>
-    <span class="nav-badge">10 recreations</span>
+    <span class="nav-badge">11 recreations</span>
   </nav>
 
   <section class="hero">
@@ -134,7 +134,7 @@
     <h1>Video to web, <em>frame by frame.</em></h1>
     <p>Each animation was analyzed from a source video using Claude Code — extracted, described, and faithfully rebuilt in pure HTML, CSS, and JavaScript. Each prompt is fully reusable — no source video needed.</p>
     <div class="hero-stats">
-      <div class="stat"><span class="stat-number">10</span><span class="stat-label">Animations</span></div>
+      <div class="stat"><span class="stat-number">11</span><span class="stat-label">Animations</span></div>
       <div class="stat"><span class="stat-number">HTML</span><span class="stat-label">Output format</span></div>
       <div class="stat"><span class="stat-number">0</span><span class="stat-label">Dependencies</span></div>
     </div>
@@ -172,10 +172,10 @@
 <strong>Bubble states:</strong>
 - Inactive: border #393939, background #252528
 - Active: border #00cc55, background rgba(0,204,85,0.055), box-shadow glow 22px rgba(0,204,85,0.38)
-- Transition: 0.45s ease-out on all properties
+- Transition: 0.45s ease-out
 
-<strong>Dots:</strong> 3 per bubble, 6×6px, delays 0s/0.22s/0.44s. Inactive: #555558, scale 0.88→1.02. Active: #00cc55, scale 0.75→1.20.
-<strong>Scroll:</strong> translateY(635px) → translateY(−140px), 12s linear infinite. JS cycles active class every 4000ms.</div>
+<strong>Dots:</strong> 3 per bubble, 6×6px, delays 0/.22/.44s. Inactive: #555558, scale .88→1.02. Active: #00cc55, scale .75→1.20. Both 1.15s ease-in-out.
+<strong>Scroll:</strong> translateY(635px)→translateY(−140px), 12s linear infinite. JS cycles active class every 4000ms.</div>
         </div>
         <div class="card-actions">
           <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-1" target="_blank">View live <span class="view-link-arrow">↗</span></a>
@@ -198,19 +198,16 @@
         <div class="divider"></div>
         <div class="prompt-section">
           <p class="prompt-label">Reverse Engineered Prompt</p>
-          <div class="prompt-box" id="prompt-2">Build a portrait-format holographic Visa credit card centered on a softly glowing background. Loops over 10s. Card responds to mouse with interactive 3D tilt.
+          <div class="prompt-box" id="prompt-2">Build a portrait-format holographic Visa credit card centered on a softly glowing background. Loops 10s. Card responds to mouse with 3D tilt.
 
-<strong>Canvas:</strong> Body background #fdf4ff. Card: 340×456px, border-radius 22px, pink glow shadow + inset 0.5px white rim.
+<strong>Canvas:</strong> Body #fdf4ff. Card 340×456px, border-radius 22px, pink glow shadow + inset 0.5px white rim. 3 blurred background orbs: purple 540px (#c9a8e8→#a070cc, 12s), coral 420px (#e8c0a8→#cc9878, 12s), pink 320px (#f4cce8→#e0a0d0, 16s).
 
-<strong>Background orbs:</strong> Purple 540×540px (#c9a8e8→#a070cc, blur 90px, 12s), Coral 420×420px (#e8c0a8→#cc9878, 12s), Pink 320×320px (#f4cce8→#e0a0d0, 16s).
-
-<strong>Card top 72%:</strong> 135deg gradient cycling hot pink→purple→coral→pink, background-size 200% 200%, animate position 0%→100% over 10s. Brush texture: diagonal hairlines rgba(255,255,255,.06), drift 100px over 10s. Two light streaks sweep upper-left to lower-right (peak opacity .92 and .60).
+<strong>Card top 72%:</strong> 135deg gradient cycling hot pink→purple→coral→pink, background-size 200% 200%, animate position 0%→100% over 10s. Brush texture diagonal hairlines rgba(255,255,255,.06) drift 100px 10s. Two white light streaks sweep upper-left to lower-right (peak opacity .92 and .60).
 
 <strong>EMV Chip:</strong> 54×43px, metallic gold gradient, circuit grid lines, center pad.
-<strong>NFC icon:</strong> 3 SVG arcs at radii 5/9/13, stroke rgba(255,255,255,.90) 2.2px.
-<strong>Bottom panel (28%):</strong> White, VISA Times New Roman italic 900, color #1a1f71, right-aligned.
-<strong>Card idle:</strong> 10s rotateX(±2.5°) rotateY(±3.5°) scale(0.975→1.005).
-<strong>Mouse tilt:</strong> mousemove → cancel CSS, apply rotateX(−dy×14deg) rotateY(dx×14deg). mouseleave → restore.</div>
+<strong>NFC icon:</strong> 3 SVG arcs radii 5/9/13, stroke rgba(255,255,255,.90) 2.2px.
+<strong>Bottom panel (28%):</strong> White, VISA Times New Roman italic 900, #1a1f71, right-aligned.
+<strong>Idle:</strong> 10s rotateX(±2.5°) rotateY(±3.5°) scale(.975→1.005). Mouse: cancel CSS → rotateX(−dy×14deg) rotateY(dx×14deg). Leave: restore.</div>
         </div>
         <div class="card-actions">
           <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-2" target="_blank">View live <span class="view-link-arrow">↗</span></a>
@@ -237,14 +234,13 @@
 
 <strong>Canvas:</strong> Page #000000, scene 500×470px centered. Cards position: absolute.
 
-<strong>Card geometry:</strong> 418×114px, diamond clip-path polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%). Fill #131318. SVG border gradient rgba(255,255,255,.22)→rgba(255,255,255,.06). Depth shadow shifted 10px down, fill rgba(255,255,255,.032).
+<strong>Card geometry:</strong> 418×114px, diamond clip-path polygon(50% 0%,100% 50%,50% 100%,0% 50%). Fill #131318. SVG border gradient rgba(255,255,255,.22)→rgba(255,255,255,.06). Depth shadow shifted 10px down, fill rgba(255,255,255,.032).
 
-<strong>Positions:</strong> Top (Webpack) top 25px, Middle (Copilot) top 176px, Bottom (Git) top 327px. All left 41px.
+<strong>Positions:</strong> Top (Webpack) 25px, Middle (Copilot) 176px, Bottom (Git) 327px. All left 41px.
 
-<strong>Icons:</strong> Webpack: concentric hexagons outer r46 #cacaca, inner r28 #111115. Copilot: #4e23ec ring r37 + cat body/ears/eyes. Git: #8b1f1f rect + fork with 3 nodes #111115.
+<strong>Icons:</strong> Webpack: hexagons outer r46 #cacaca, inner r28 #111115. Copilot: #4e23ec ring r37 + cat body/ears/eyes. Git: #8b1f1f rect + fork 3 nodes #111115.
 
-<strong>4 animation layers:</strong> stackFloat ±14px 9.68s · floatOuter ±5px 4.84s · floatMid ±12px inverted 4.84s · JS spring parallax stiffness 180 damping 28 mass 0.8.
-
+<strong>4 animation layers:</strong> stackFloat ±14px 9.68s · floatOuter ±5px 4.84s · floatMid ±12px inverted · JS spring stiffness 180 damping 28 mass 0.8.
 <strong>Depth multipliers:</strong> Top 1.30×, Middle 1.00×, Bottom 0.65×. Semi-implicit Euler, dt capped 0.05s.</div>
         </div>
         <div class="card-actions">
@@ -268,15 +264,13 @@
         <div class="divider"></div>
         <div class="prompt-section">
           <p class="prompt-label">Reverse Engineered Prompt</p>
-          <div class="prompt-box" id="prompt-4">Build a full-screen interactive Canvas 2D animation. 185 thin lines radiate from a vanishing point just below bottom-center. Each ends in a small circle. Static at rest — strings sway when cursor moves nearby, spring back when cursor stops.
+          <div class="prompt-box" id="prompt-4">Build a full-screen interactive Canvas 2D animation. 185 thin lines radiate from a vanishing point just below bottom-center. Each ends in a small circle. Static at rest — strings sway when cursor moves nearby, spring back when it stops.
 
-<strong>Canvas:</strong> 100% viewport. Origin: W/2, H+6. Responsive on resize.
+<strong>Canvas:</strong> 100% viewport. Origin: W/2, H+6. Responsive on resize. Background: radial gradient every frame #f2f7ff→#e2ecfc→#d0e2f8→#bdd4f0→#a8c4e8.
 
-<strong>Background:</strong> Radial gradient every frame. Stops: #f2f7ff→#e2ecfc→#d0e2f8→#bdd4f0→#a8c4e8.
+<strong>185 strings (LCG PRNG seed 42):</strong> Angles π×(0.02+t×0.96) ±2.75° jitter. Lengths maxLen×(0.22+rnd()^0.75×0.78). Line 0.85px rgba(38,55,158,α) opacity .38–.80. Dot radius 1.8–4.0px rgba(32,46,148,α).
 
-<strong>185 strings (LCG PRNG seed 42):</strong> Angles sweep π×(0.02+t×0.96) ±2.75° jitter. Lengths maxLen×(0.22+rnd()^0.75×0.78). Line 0.85px rgba(38,55,158,α) opacity .38–.80. Dot radius 1.8–4.0px rgba(32,46,148,α).
-
-<strong>Physics per rAF:</strong> Spring α=−18×(angle−rest). Damping −8.5×omega. Wind: Gaussian exp(−d²/(2×180²))×perpendicular cursor speed×tip factor t. Euler integration, dt capped 50ms. Clamp ±0.42 rad, bounce ×−0.2.
+<strong>Physics per rAF:</strong> Spring α=−18×(angle−rest). Damping −8.5×omega. Wind: Gaussian exp(−d²/(2×180²))×perpendicular cursor speed×tip factor t. Euler, dt capped 50ms. Clamp ±0.42 rad, bounce ×−0.2.
 
 <strong>Cursor velocity:</strong> performance.now() per mousemove, capped ±1400px/s, EMA α=0.35, decays exp(−12×dt) idle.</div>
         </div>
@@ -301,19 +295,15 @@
         <div class="divider"></div>
         <div class="prompt-section">
           <p class="prompt-label">Reverse Engineered Prompt</p>
-          <div class="prompt-box" id="prompt-5">Build a cursor-driven data visualization. Two dense rows of narrow vertical bars on warm off-white canvas, centered on dark background. Zero animations — all motion cursor-driven only.
+          <div class="prompt-box" id="prompt-5">Build a cursor-driven data visualization. Two dense rows of narrow vertical bars on warm off-white canvas on dark background. Zero CSS animations — all motion cursor-driven only.
 
-<strong>Canvas:</strong> Page #1a1a1a. Stage 960×272px, background #EDE8E0. Scale: transform scale(min(vw/960, vh/272)), transform-origin top left.
+<strong>Canvas:</strong> Page #1a1a1a. Stage 960×272px background #EDE8E0. Scale: transform scale(min(vw/960,vh/272)), transform-origin top left.
 
-<strong>Two rows:</strong> Top row height 146px bars downward. Bottom row height 116px bars upward.
+<strong>Two rows:</strong> Top 146px bars downward. Bottom 116px bars upward. Bar generation mulberry32 PRNG: top seed 42 (3–6px wide, 55–140px tall, 2–4px gap), bottom seed 99 (40–110px). Default #111111, accent #8B6BC4.
 
-<strong>Bar generation (mulberry32 PRNG):</strong> Top seed 42: width 3–6px, height 55–140px, gap 2–4px. Bottom seed 99: height 40–110px. Default #111111, accent #8B6BC4.
+<strong>3 purple accent bars:</strong> topP1 at .33, topP2 at .66, botP1 at .22. Cursor hairlines 3px #D4705A, split at 136px, fade after 500ms, opacity 0.12s transition.
 
-<strong>3 purple accent bars:</strong> topP1 at 0.33, topP2 at 0.66, botP1 at 0.22.
-
-<strong>Cursor hairlines:</strong> 3px, color #D4705A. Split at 136px. Fade after 500ms idle. Opacity 0.12s transition.
-
-<strong>Hover cards (3):</strong> background #7B5EA7, Courier New 8px, width 138px. 24px invisible hit zones. Cards 1 & 2 anchor top, Card 3 anchor bottom (scaleY from bottom). Animate opacity + scaleY 0.18s.
+<strong>3 hover cards (background #7B5EA7, Courier New 8px, width 138px):</strong> 24px invisible hit zones. Cards 1 & 2 anchor top, Card 3 anchor bottom (scaleY from bottom). Animate opacity + scaleY 0.18s.
 
 <strong>Decorative diagonals:</strong> diag-tl rotate(28deg), diag-br rotate(−22deg), both #111111. Zero keyframes.</div>
         </div>
@@ -338,21 +328,21 @@
         <div class="divider"></div>
         <div class="prompt-section">
           <p class="prompt-label">Reverse Engineered Prompt</p>
-          <div class="prompt-box" id="prompt-6">Build an interactive desktop-style CSV upload scene. User manually drags an Excel-like file icon into an upload area, triggering a soft transition into a customer table. No frameworks.
+          <div class="prompt-box" id="prompt-6">Build an interactive desktop-style CSV upload scene. User drags an Excel-like file icon into an upload area, triggering a soft transition into a customer table. No frameworks.
 
-<strong>Stage:</strong> Body #101515. Aspect-ratio 1284/950, width min(100vw, calc(100vh×1.3516)). Dark teal gradient + dotted texture rgba(255,255,255,.035) at 18px grid.
+<strong>Stage:</strong> Body #101515. Aspect-ratio 1284/950, width min(100vw,calc(100vh×1.3516)). Dark teal gradient + dotted texture rgba(255,255,255,.035) 18px grid.
 
-<strong>App window:</strong> left 6.75%, right 6.55%, top 28.95%, height 72%. Top bar #92aaad, border-radius 17px. Logo: aqua circle #67fff2 + lime square #cfff8f. "Acme Corp" 29px weight 750. Shell grid: 82px sidebar + content.
+<strong>App window:</strong> left 6.75%, right 6.55%, top 28.95%, height 72%. Top bar #92aaad, border-radius 17px. Logo: aqua circle #67fff2 + lime square #cfff8f. "Acme Corp" 29px 750. Shell grid: 82px sidebar + content.
 
-<strong>Upload zone:</strong> left 7%, right 6.2%, top 184px, height 405px. Border 3px dashed #86fff0, border-radius 23px. CSS-only cloud icon. "DRAG & DROP YOUR FILE" Courier New 25px weight 800.
+<strong>Upload zone:</strong> left 7%, right 6.2%, top 184px, height 405px. Border 3px dashed #86fff0, border-radius 23px. CSS cloud icon. "DRAG & DROP YOUR FILE" Courier New 25px 800.
 
-<strong>CSV file:</strong> left 70.2%, top 3.65%, cursor grab. Card background #dbe9ea. Green spreadsheet #0d6e36→#17a959→#0d8846 + "X" badge. "Customers.csv" white 18px.
+<strong>CSV file:</strong> left 70.2%, top 3.65%, cursor grab. Card #dbe9ea. Green spreadsheet #0d6e36→#17a959→#0d8846 + "X" badge. "Customers.csv" white 18px.
 
-<strong>Drag (Pointer Events):</strong> pointerdown → stage-relative px + setPointerCapture. pointermove → update left/top + toggle .drop-ready (lime border, scale 1.01). pointerup over zone → .dropped + reveal. Elsewhere → file stays.
+<strong>Drag (Pointer Events):</strong> pointerdown → stage-relative px + setPointerCapture. pointermove → update left/top + .drop-ready (lime border, scale 1.01). pointerup over zone → .dropped. Elsewhere → file stays.
 
-<strong>Drop animations:</strong> file consume 0.5s · upload fade 0.85s · wash rgba(188,210,211,.48) 1.1s · table reveal 1s delay 0.32s · 5 rows stagger delays 0/.06/.12/.18/.24s + 0.66s base.
+<strong>Drop animations:</strong> file consume .5s · upload fade .85s · wash rgba(188,210,211,.48) 1.1s · table reveal 1s delay .32s · 5 rows stagger delays 0/.06/.12/.18/.24s + .66s.
 
-<strong>Table:</strong> AALIYAH JOHNSON / DONOVAN MAY / LISA BUEHNER / STEVE TURNER / SAMANTHA RIVERS. Tags RESIDENT (#cfff8f), BUSSINESS (#8fffee). CSS-only avatars. Grain overlay mix-blend-mode soft-light opacity .25.</div>
+<strong>Table:</strong> 5 rows. Tags RESIDENT (#cfff8f), BUSSINESS (#8fffee). CSS-only avatars. Grain overlay mix-blend-mode soft-light opacity .25.</div>
         </div>
         <div class="card-actions">
           <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-6" target="_blank">View live <span class="view-link-arrow">↗</span></a>
@@ -375,19 +365,17 @@
         <div class="divider"></div>
         <div class="prompt-section">
           <p class="prompt-label">Reverse Engineered Prompt</p>
-          <div class="prompt-box" id="prompt-7">Build an abstract flowing fabric surface made from SVG Bezier line strands. Warm orange/pink crease in front, purple sheet lifting upward/backward, lower strands receding. Loops every 28.269s.
+          <div class="prompt-box" id="prompt-7">Build an abstract flowing fabric surface from SVG Bezier line strands. Warm orange/pink crease in front, purple sheet lifting backward, lower strands receding. Loops every 28.269s.
 
-<strong>Canvas:</strong> Page #090f28. Viewport height min(100vh, 29.125vw), min-height 260px. SVG viewBox 0 0 2246 688. Background: radial + linear #091027→#091026→#090f24. Vignette on all edges.
+<strong>Canvas:</strong> Page #090f28. Viewport height min(100vh,29.125vw), min-height 260px. SVG viewBox 0 0 2246 688. Background: radial + linear #091027→#091026→#090f24. Vignette on all edges.
 
-<strong>SVG gradients:</strong> strandWarm (#fd7459→#ff4eab→#9a29ff→#4f1cc9) · strandViolet (#7924ff→#bb27ff→#37166f) · strandBack (#ff8a62→#9b27ff→#40177f).
+<strong>Gradients:</strong> strandWarm (#fd7459→#ff4eab→#9a29ff→#4f1cc9) · strandViolet (#7924ff→#bb27ff→#37166f) · strandBack (#ff8a62→#9b27ff→#40177f).
 
 <strong>4 phases (offset/alpha/y):</strong> (0/1/0) (.018/.32/18) (.043/.18/36) (-.024/.16/-16). Each: 22 backwash (strandBack .72) + 38 fan (strandViolet 1.08, purple glow) + 5 crease (strandWarm 1.48, pink glow) + 32 ribbon (strandWarm 1/1.28). All fill none, round caps, mix-blend-mode screen.
 
-<strong>Motion (30fps, 28.269s):</strong> 6 keyframes for 8 parameters. Smoothstep t²(3−2t). Sine drift pulse/drift. Ripple: two overlapping sine waves per path.
+<strong>Motion (30fps, 28.269s):</strong> 6 keyframes, 8 parameters. Smoothstep t²(3−2t). Sine drift + ripple (two overlapping sine waves per path).
 
-<strong>CSS drift:</strong> 16s ease-in-out, translateX/Y ±1.5%, scale 1.015–1.025.
-
-<strong>3 glow divs + 2 comet dots:</strong> Glows at left 27%/50%/73%, mix-blend-mode screen, animate 28.269s. Comets 12×12px and 18×18px follow SVG offset-paths, animate offset-distance 28.269s, fade in/out around loop end.</div>
+<strong>CSS drift:</strong> 16s ease-in-out ±1.5% scale 1.015–1.025. 3 glow divs (mix-blend-mode screen, 28.269s). 2 comet dots: 12×12px and 18×18px, SVG offset-paths, fade in/out around loop end.</div>
         </div>
         <div class="card-actions">
           <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-7" target="_blank">View live <span class="view-link-arrow">↗</span></a>
@@ -412,17 +400,15 @@
           <p class="prompt-label">Reverse Engineered Prompt</p>
           <div class="prompt-box" id="prompt-8">Build an interactive glossy jackstone/tube-connector pile on Canvas 2D. 11 3D-looking objects sit in a dark studio space. Moving cursor near them triggers explosive scatter with spring-physics return. Click cycles recolorable objects red→blue→yellow→green.
 
-<strong>Layout:</strong> Page #eef2fa. Frame min(100vw,1429px), aspect-ratio 2858/1530. Dark rounded viewport: left 4.2%, right 5.1%, top 4.45%, height 85.25%, border-radius 18px, background #151113, cursor crosshair.
+<strong>Layout:</strong> Page #eef2fa. Frame min(100vw,1429px), aspect-ratio 2858/1530. Dark rounded viewport: left 4.2%, right 5.1%, top 4.45%, height 85.25%, border-radius 18px, #151113, cursor crosshair.
 
 <strong>11 objects (x/y/scale/rotation/color/z):</strong> white z8 (.04,.58,1.32,−.22) · red z7 (.31,.60,.98,−.74) · white z16 (.41,.50,1.18,.24) · red z18 (.63,.55,1.22,.34) · black z6 (.91,.33,1.32,.4) · red z19 (.08,.92,1.32,.34) · black z22 (.44,.88,1.06,.8) · white z24 (.61,.88,1.26,−.16) · red z21 (.96,.82,1.28,−.36) · black z4 (.47,.18,.96,−.5) · white z9 (.72,.18,1.16,−.28)
 
-<strong>Each jackstone (Canvas 2D):</strong> base=min(W,H)×.31×scale. 3 capsule tubes (vertical, diagonal, horizontal) with vertical linear gradient (38% white mix top → base → 50% black mix bottom). Glossy highlight stripe + two end ellipses with radial gradient + central hole. Center blend (blur 5px) + hub. Sorted by z, drop shadow ellipse below.
+<strong>Each jackstone:</strong> base=min(W,H)×.31×scale. 3 capsule tubes (vertical/diagonal/horizontal) with vertical linear gradient (38% white mix → base → 50% black mix). Glossy highlight + two end ellipses (radial gradient + central hole). Center blend blur 5px + hub. Sorted by z, drop shadow ellipse below.
 
-<strong>Colors:</strong> red #be0010, blue #1452d2, yellow #e6be00, green #1ea53e, white #e2e2de, black #060607. Only red objects recolorable.
+<strong>Colors:</strong> red #be0010, blue #1452d2, yellow #e6be00, green #1ea53e, white #e2e2de, black #060607. Only red recolorable.
 
-<strong>Physics:</strong> Burst radius min(W,H)×.42. power=(1-dist/r)^2.2×strength. vx/vy += force/mass + turbulence. Spring back vx+=−ox×.026, damping ×.8. RAF only while moving.
-
-<strong>Interactions:</strong> pointermove within min(W,H)×.2 → burst .82, throttled 85ms. Click → burst 1.25 + cycle colors. pointerleave → resettle.</div>
+<strong>Physics:</strong> Burst radius min(W,H)×.42. power=(1-dist/r)^2.2×strength. Spring back vx+=−ox×.026, damping ×.8. RAF only while moving. pointermove within min(W,H)×.2 → burst .82, throttled 85ms. click → burst 1.25 + cycle. pointerleave → resettle.</div>
         </div>
         <div class="card-actions">
           <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-8" target="_blank">View live <span class="view-link-arrow">↗</span></a>
@@ -445,35 +431,21 @@
         <div class="divider"></div>
         <div class="prompt-section">
           <p class="prompt-label">Reverse Engineered Prompt</p>
-          <div class="prompt-box" id="prompt-9">Build a scroll-driven landing animation for a brand asset platform. Fixed nav, full-bleed cinematic blue hero with floating upload card, logo strip, and a library section where 8 image cards land in a 4×2 grid with metadata labels that progressively generate.
+          <div class="prompt-box" id="prompt-9">Build a scroll-driven landing animation for a brand asset platform. Fixed nav, cinematic blue hero with floating upload card, logo strip, and a library section where 8 image cards land in a 4×2 grid with progressively generating metadata labels.
 
-<strong>Style:</strong> Editorial SaaS — cream background #EDEAE2, cinematic blue hero gradient #54779f→#0d527f→#003455, Georgia serif headlines, system UI for nav/labels, restrained motion. Purple accent #7C3AED.
+<strong>Style:</strong> Editorial SaaS — cream #EDEAE2, cinematic blue hero #54779f→#0d527f→#003455, Georgia serif headlines, system UI for nav/labels. Purple accent #7C3AED.
 
-<strong>Fixed nav:</strong> height 60px, z-index 300, background rgba(255,255,255,.97), backdrop-filter blur(10px). Left: SVG triangle logo + 4 dropdown menu items. Right: Pricing, EN ▾, Login, Demo buttons. Demo: background #1a1a1a, white text, border-radius 100px.
+<strong>Fixed nav:</strong> height 60px, z-index 300, rgba(255,255,255,.97), backdrop blur 10px. Left: SVG triangle logo + 4 dropdown items. Right: Pricing, EN, Login, Demo (background #1a1a1a, border-radius 100px).
 
-<strong>Hero:</strong> height min(100vh,720px), min-height 590px. Hero photo (woman in pink jacket, blue sky, rocky terrain) as background, opacity .96. Hero text is FIXED (not scrolling) — fades out based on scrollY. Georgia headline "The command center for brand work" clamp(48px,5.7vw,82px). Floating upload card: left 50%, top clamp(246px,42vh,278px), width min(428px,58vw), aspect-ratio 1.55, dashed white border, PNG chip + "✧ Magic hour" chip + purple sparkle button #b904e8.
+<strong>Hero:</strong> height min(100vh,720px), min-height 590px. Hero photo as background opacity .96. Hero text is FIXED — fades based on scrollY. Georgia headline "The command center for brand work" clamp(48px,5.7vw,82px). Floating upload card: left 50%, top clamp(246px,42vh,278px), width min(428px,58vw), aspect-ratio 1.55, dashed white border, PNG chip + "✧ Magic hour" chip + purple sparkle button #b904e8.
 
-<strong>8 fixed-position photo cards</strong> (z-index 208–201, initially opacity 0): width clamp(96px,7.9vw,118px), aspect-ratio 1/1.28. Each has stacked hero photo + unique thumbnail (thumb fades in during spread). STACK offsets for pile state: dx/dy/rot per card. Grid target: 4×2, column-gap clamp(42px,5.8vw,84px), row-gap 58px.
+<strong>8 fixed-position photo cards</strong> (initially opacity 0, z-index 208–201): width clamp(96px,7.9vw,118px), aspect-ratio 1/1.28. Each: stacked hero photo + unique thumbnail (thumb fades during spread). STACK offsets for pile state per card.
 
-<strong>Scroll phases (easeInOut cubic):</strong>
-- Phase 1 (heroH×0.025–0.22): pile forms from upload card
-- Phase 2 (heroH×0.42–1.05): pile spreads to grid positions
-- Hero body opacity fades at heroH×.38. Upload card fades + lifts during stackT.
-- cardW lerps bigW→gridW, cardH lerps bigH→gridH. Cards stagger: staggerStart=i×.045.
+<strong>Scroll phases (easeInOut cubic):</strong> Phase 1 (heroH×.025–.22): pile forms. Phase 2 (heroH×.42–1.05): spreads to 4×2 grid. cardW lerps bigW→gridW. Cards stagger staggerStart=i×.045. Hero fades at heroH×.38.
 
-<strong>Section reveal:</strong> Library section "Upload and it's organized" Georgia clamp(34px,4.2vw,60px) + breadcrumb + invisible grid anchors (visibility:hidden placeholders). Fixed labels follow card coordinates.
+<strong>Section reveal:</strong> "Upload and it's organized" Georgia clamp(34px,4.2vw,60px). Invisible grid anchors (visibility:hidden). Fixed labels follow card coordinates (position:fixed, z-index 230).
 
-<strong>Metadata sequence</strong> (triggers when all cards landed, t≥1):
-- 0ms: labels show staggered 90ms + i×34ms
-- 350ms: filenames (img-3295959, aug-shoot-42, etc.)
-- 1100ms: meta bar "✦ Metadata generating..." appears, dots animate
-- 1700ms: category labels (📁 Lifestyle, 📁 Organic, etc.)
-- 2800ms: tag labels (🏷 people, outdoor, sky…)
-- 3900ms: final names (Blue sky portrait, Leaf on water, etc.)
-- 4700ms: file types (PNG, JPG, PNG…)
-- 5700ms: meta bar → "generated", turns #1a1a1a
-
-<strong>Fixed labels:</strong> position fixed, z-index 230, width = cardW, left = cardX, top = cardY + cardH + 9. Top label 10.5px #1a1a1a, bottom label 9.5px #999. Labels update with stagger i×48ms — remove .on, rAF update text, re-add .on.</div>
+<strong>Metadata sequence (triggers when t≥1):</strong> staggered labels → filenames → "✦ Metadata generating..." with animated dots → categories (📁) → tags (🏷) → final names → file types → "generated" state. Each stage i×48ms stagger with .on class transitions.</div>
         </div>
         <div class="card-actions">
           <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-9" target="_blank">View live <span class="view-link-arrow">↗</span></a>
@@ -498,23 +470,17 @@
           <p class="prompt-label">Reverse Engineered Prompt</p>
           <div class="prompt-box" id="prompt-10">Build a tall minimalist product-recommendation animation: soft white UI card with chat bubbles and product cards, floated over a pink/violet particle ring background. All animations loop every 7.65s.
 
-<strong>Stage:</strong> Portrait, width min(100vw,69vh), height min(100vh,145vw), max 828×1200px. Background: radial rgba(236,247,255,.58) + linear #ffffff→#fbfdff. Grid overlay: vertical rgba(198,216,231,.7) + horizontal rgba(198,216,231,.38), opacity .28, mix-blend-mode multiply. Pink ring: radial transparent 0–35%, rgba(255,239,249,.5) 35–52%, transparent 53%, opacity .22.
+<strong>Stage:</strong> Portrait width min(100vw,69vh), height min(100vh,145vw), max 828×1200px. Background: radial rgba(236,247,255,.58) + linear #ffffff→#fbfdff. Grid overlay opacity .28 mix-blend-mode multiply. Pink ring: radial transparent 0–35%, rgba(255,239,249,.5) 35–52%, opacity .22.
 
 <strong>Particle ring (Canvas behind UI):</strong> position absolute, inset -7% -13% 15%, width 126%, height 92%, z-index 1. ~900+ particles in elliptical ring: centerX 50%, centerY 46%, radiusX 40.5%, radiusY 31.5%. 62% magenta #e24395, 38% violet #934cbb. Size .65–2.10px, alpha .26–.80. Spring force .014, damping .88. Draw as fillRect squares.
 
-<strong>Cursor clustering (within 142px):</strong> pull toward line through cursor along velocity direction, strength (1-dist/142)^1.45 × .22. Click burst radius 130px. Auto burst every 1500–2800ms at random, force 0.42.
+<strong>Cursor clustering (within 142px):</strong> pull toward line through cursor along velocity direction, strength (1-dist/142)^1.45×.22. Click burst radius 130px. Auto burst every 1500–2800ms, force .42.
 
-<strong>UI (z-index 2, left 50%, top 15.8%, width min(66.7%,552px), translateX(-50%)):</strong>
+<strong>UI (z-index 2, left 50%, top 15.8%, translateX(-50%)):</strong> Bubble 1 (width 82%, margin-left auto): "I'm refreshing my wardrobe..." Bubble 2 (width 93%, margin 44px auto 0 0): "Absolutely. Here are a few comfy essentials..."
 
-Bubble 1: width 82%, margin-left auto. "I'm refreshing my wardrobe. Can you recommend some cozy, comfortable basics in size M?" weight 620.
-Bubble 2: width 93%, margin 44px auto 0 0. "Absolutely. Here are a few comfy essentials..."
+<strong>Recommendation card:</strong> 2-column grid 15px gap, background rgba(255,255,255,.94). Deluxe Shirt $26.00 (CSS clip-path blue shirt #005bb1→#086fd4) · Essential Hoodie $48.00 (CSS clip-path navy hoodie #071021→#111d35). Buy now: #e8f0f8, #1d4774.
 
-<strong>Recommendation card:</strong> 2-column grid 15px gap, background rgba(255,255,255,.94), shadow 0 20px 48px rgba(27,36,48,.11).
-- Deluxe Shirt / Blue - Medium / $26.00 / Cartsy. CSS clip-path blue shirt #005bb1→#086fd4→#0d73d6.
-- Essential Hoodie / Navy - Medium / $48.00 / Cartsy. CSS clip-path navy hoodie #071021→#111d35→#0b1629.
-- Buy now: background #e8f0f8, color #1d4774, border-radius 4px.
-
-<strong>CSS animations (all 7.65s infinite):</strong> canvasDrift (translate ±1.8%, scale 1.01–1.018) · scene settle translateY 0→4px · bubble 1 translateX ±3px · bubble 2 opposite phase · card translateY 0→5px.</div>
+<strong>CSS animations (all 7.65s infinite):</strong> canvasDrift translate ±1.8% scale 1.01–1.018 · scene translateY 0→4px · bubbles translateX ±3px opposite phase · card translateY 0→5px.</div>
         </div>
         <div class="card-actions">
           <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-10" target="_blank">View live <span class="view-link-arrow">↗</span></a>
@@ -523,11 +489,54 @@ Bubble 2: width 93%, margin 44px auto 0 0. "Absolutely. Here are a few comfy ess
       </div>
     </div>
 
+    <!-- Animation 11 -->
+    <div class="animation-card">
+      <div class="preview-panel">
+        <div class="card-chip"><div class="card-chip-dot"></div>Live preview</div>
+        <div class="preview-overlay"></div>
+        <iframe src="https://animations-two-kohl.vercel.app/animation-11" title="Animation 11" loading="lazy"></iframe>
+      </div>
+      <div class="info-panel">
+        <div class="info-number">Recreation 11</div>
+        <h3 class="info-title">Fintech Globe<br><em>Transaction Lines</em></h3>
+        <div class="info-tags"><span class="tag">HTML</span><span class="tag">Canvas 2D</span><span class="tag">Vanilla JS</span><span class="tag">Generative</span><span class="tag">30.4s cycle</span></div>
+        <div class="divider"></div>
+        <div class="prompt-section">
+          <p class="prompt-label">Reverse Engineered Prompt</p>
+          <div class="prompt-box" id="prompt-11">Build a premium fintech-style animated globe visualization: a tall portrait frame containing a softly glowing white earth made of thousands of tiny colored particles. The globe rotates slowly around its vertical axis only. Curved transaction lines appear in a staged sequence — each draws start-to-end, a small amount tag travels along it, then it erases start-to-end. Always exactly two active routes at a time.
+
+<strong>Frame:</strong> Portrait aspect-ratio 816/1124, width min(100vw,calc(100vh×816/1124)). Page background: radial #fff 0–44%, rgba(247,245,255,.8) 62%, rgba(239,243,255,.78) 100%. Frame background: radial rgba(255,255,255,.98)→rgba(255,255,255,.78)→rgba(242,244,255,.72). Two faint elliptical rings (border rgba(66,42,165,.08) and rgba(222,58,138,.075)). Grid overlay 44px, opacity .28, mix-blend-mode multiply, masked to outer ring only.
+
+<strong>Camera motion:</strong> .world layer (inset -8% -12%, transform-origin 48% 52%) animates camera 30.4s cubic-bezier(.45,0,.2,1) — slow drift/zoom, NO rotation/roll. Scale 1.02–1.14, translate ±9%.
+
+<strong>Globe (Canvas 1050×1370):</strong> cx=W×.52, cy=H×.51, rx=W×.50, ry=H×.38. Vertical spin only: spinSpeed=.10, spin=t×.10. Projection: lon=(x/W−.5)×π×2.34, lat=(.5−y/H)×π×1.18, then standard 3D sphere projection. horizon = clamp((z3+.22)/1.22,0,1).
+
+<strong>Particles (~11,240 total from 7 continent shapes):</strong> Generated from ellipse shapes (northAmerica 2850, southAmerica 1650, europeAsia 4100, africa 1900, australia 800, scandinavia 520, islands 420). 3 dot sizes (.105/1.55/2.2px). Colors: blue (#211ea5→#7660d9), pink (#bf209b→#ef7773), mixed (#3421b5→#d42e99). Rendered alpha = dot.alpha×(.18+horizon×.88). Plus 1700 mist specks.
+
+<strong>6 transaction routes with delays:</strong> −3.9/1.8/7.3/12.9/18.6/23.4s. Each route: from/to lon-lat coordinates, colorA/colorB gradient, lift height, amount label, token name, coin fill color. Stabilize direction once at setup to prevent tag moving backward.
+
+<strong>Route lifecycle (30.4s loop, active window .02–.56):</strong>
+- Draw: smoothstep(.02,.105,local) — line draws progressively
+- Tag: moves smoothstep(.14,.42,local), visible .125–.48
+- Erase: smoothstep(.47,.56,local) — line erases from start
+- Always draw only top 2 routes scored by: lineAlpha + centerScore×.18
+
+<strong>Amount tag (Canvas only):</strong> follows exact quadratic curve via pointOnQuadratic. White rounded rect, height 25px. Icon square 25px with coin color + white circle stroke + two white dots. Amount text #101727, token text #485062. Shadow: rgba(42,34,90,.12) blur 16 offsetY 6.
+
+<strong>Endpoint nodes:</strong> outer pulse r11 (fill route color, alpha×.18) + inner circle r6.3 (white fill, route color stroke 3px).</div>
+        </div>
+        <div class="card-actions">
+          <a class="view-link" href="https://animations-two-kohl.vercel.app/animation-11" target="_blank">View live <span class="view-link-arrow">↗</span></a>
+          <button class="copy-btn" onclick="copyPrompt('prompt-11', this)">Copy prompt</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <footer>
     <p>Built with <span>Claude Code</span></p>
-    <p>10 animations · HTML / CSS / JS · No dependencies</p>
+    <p>11 animations · HTML / CSS / JS · No dependencies</p>
   </footer>
 
   <script>

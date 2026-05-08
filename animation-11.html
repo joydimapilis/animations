@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Animation 11 Recreation</title>
+<style>
+  :root {
+    --w: 816;
+    --h: 1124;
+    --duration: 30.4s;
+    --ink: #111827;
+    --muted: #6f7484;
+    --blue: #3928c9;
+    --violet: #7f3fd1;
+    --magenta: #d7339a;
+    --rose: #ee696b;
+    --lavender: #a891f2;
+  }
+
+  * { box-sizing: border-box; }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 44%, rgba(247, 245, 255, .8) 62%, rgba(239, 243, 255, .78) 100%);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background:
+      linear-gradient(110deg, rgba(87, 83, 218, .06), transparent 30% 72%, rgba(244, 111, 151, .04)),
+      #fbfbfd;
+  }
+
+  .phone-frame {
+    position: relative;
+    width: min(100vw, calc(100vh * 816 / 1124));
+    aspect-ratio: 816 / 1124;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 52% 45%, rgba(255, 255, 255, .98) 0 39%, rgba(255, 255, 255, .78) 56%, rgba(242, 244, 255, .72) 100%);
+    box-shadow:
+      inset 0 0 0 1px rgba(105, 111, 145, .13),
+      inset 0 12px 50px rgba(126, 91, 220, .045);
+  }
+
+  .world {
+    position: absolute;
+    inset: -8% -12%;
+    transform-origin: 48% 52%;
+    animation: camera var(--duration) cubic-bezier(.45, 0, .2, 1) infinite;
+  }
+
+  canvas,
+  svg,
+  .labels {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  canvas {
+    opacity: .96;
+    filter: saturate(1.08) contrast(1.03);
+  }
+
+  .soft-rings::before,
+  .soft-rings::after {
+    content: "";
+    position: absolute;
+    border: 1px solid rgba(66, 42, 165, .08);
+    border-radius: 50%;
+    transform: rotate(-18deg);
+    pointer-events: none;
+  }
+
+  .soft-rings::before {
+    width: 124%;
+    height: 68%;
+    left: -15%;
+    top: 7%;
+  }
+
+  .soft-rings::after {
+    width: 138%;
+    height: 72%;
+    left: -24%;
+    top: 38%;
+    border-color: rgba(222, 58, 138, .075);
+  }
+
+  .route {
+    display: none;
+    fill: none;
+    stroke-linecap: round;
+    stroke-width: 2.4;
+    opacity: 0;
+    filter: drop-shadow(0 0 2px rgba(104, 69, 205, .15));
+    stroke-dasharray: var(--dash, 1800);
+    stroke-dashoffset: var(--dash, 1800);
+    animation:
+      drawRoute var(--duration) cubic-bezier(.22, .88, .28, 1) infinite,
+      routeFade var(--duration) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  .route.thin { stroke-width: 1.55; opacity: .62; }
+  .route.purple { stroke: url(#purpleStroke); }
+  .route.pink { stroke: url(#pinkStroke); }
+  .route.blue { stroke: url(#blueStroke); }
+  .route.orange { stroke: url(#orangeStroke); }
+
+  .node {
+    display: none;
+    position: absolute;
+    width: 17px;
+    height: 17px;
+    left: calc(var(--x) * 1%);
+    top: calc(var(--y) * 1%);
+    border-radius: 50%;
+    border: 3px solid rgba(123, 86, 226, .62);
+    background: rgba(255, 255, 255, .9);
+    box-shadow:
+      0 0 0 5px rgba(126, 91, 240, .14),
+      0 0 12px rgba(102, 72, 208, .38);
+    transform: translate(-50%, -50%) scale(.75);
+    opacity: 0;
+    animation: nodePulse var(--duration) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  .node.hot {
+    border-color: rgba(225, 77, 133, .65);
+    box-shadow:
+      0 0 0 5px rgba(231, 91, 141, .13),
+      0 0 12px rgba(222, 59, 138, .32);
+  }
+
+  .tx {
+    display: none !important;
+    position: absolute;
+    left: calc(var(--x) * 1%);
+    top: calc(var(--y) * 1%);
+    align-items: center;
+    min-width: 140px;
+    height: 46px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow:
+      0 13px 30px rgba(42, 34, 90, .08),
+      0 1px 4px rgba(33, 30, 75, .08);
+    color: var(--ink);
+    opacity: 0;
+    transform: translate(-18px, -50%) scale(.92);
+    animation: labelPop var(--duration) cubic-bezier(.2, .9, .2, 1) infinite;
+    animation-delay: var(--delay, 0s);
+  }
+
+  .tx.small {
+    height: 34px;
+    min-width: 112px;
+    font-size: 12px;
+  }
+
+  .coin {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    border-radius: 4px 0 0 4px;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0;
+    background: linear-gradient(145deg, #0b1587, #3628d2);
+  }
+
+  .tx.small .coin {
+    width: 34px;
+    height: 34px;
+  }
+
+  .coin.cash { background: linear-gradient(145deg, #b6a0ff, #7c56ed); }
+  .coin.usdb { background: linear-gradient(145deg, #8b3dff, #641bf0); }
+  .coin.usdc { background: linear-gradient(145deg, #07126f, #1e2f9f); }
+
+  .mark {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, .86);
+    position: relative;
+  }
+
+  .mark::before,
+  .mark::after {
+    content: "";
+    position: absolute;
+    background: currentColor;
+  }
+
+  .mark::before {
+    width: 12px;
+    height: 7px;
+    border-radius: 8px 8px 4px 4px;
+    left: 4px;
+    top: 7px;
+  }
+
+  .mark::after {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    left: 13px;
+    top: 14px;
+    box-shadow: -5px 0 0 currentColor;
+  }
+
+  .amount {
+    padding: 0 14px 0 13px;
+    font-size: 18px;
+    font-weight: 760;
+    white-space: nowrap;
+    letter-spacing: 0;
+  }
+
+  .tx.small .amount {
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .amount span {
+    color: #495061;
+    font-weight: 680;
+    margin-left: 4px;
+  }
+
+  .square-ping {
+    display: none !important;
+    position: absolute;
+    left: calc(var(--x) * 1%);
+    top: calc(var(--y) * 1%);
+    width: 32px;
+    height: 32px;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 3px;
+    box-shadow: 0 10px 22px rgba(24, 22, 80, .08);
+    opacity: 0;
+    animation: squareFlash var(--duration) ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+
+  .square-ping::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 5px solid #1514cc;
+  }
+
+  .grain {
+    position: absolute;
+    inset: 0;
+    opacity: .28;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    background-image:
+      linear-gradient(rgba(62, 50, 160, .035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(62, 50, 160, .03) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(circle at 50% 45%, transparent 0 48%, #000 95%);
+  }
+
+  @keyframes camera {
+    0% { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+    18% { transform: translate3d(-7%, -3%, 0) scale(1.12); }
+    38% { transform: translate3d(-1%, -7%, 0) scale(1.08); }
+    57% { transform: translate3d(-9%, -16%, 0) scale(1.14); }
+    76% { transform: translate3d(3%, -7%, 0) scale(1.1); }
+    100% { transform: translate3d(-2%, -1%, 0) scale(1.02); }
+  }
+
+  @keyframes drawRoute {
+    0%, 4% { stroke-dashoffset: var(--dash, 1800); }
+    12%, 100% { stroke-dashoffset: 0; }
+  }
+
+  @keyframes routeFade {
+    0%, 5%, 28%, 100% { opacity: 0; }
+    11%, 22% { opacity: .88; }
+  }
+
+  @keyframes nodePulse {
+    0%, 6%, 28%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(.5); }
+    11%, 22% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    14%, 20% { box-shadow: 0 0 0 8px rgba(126, 91, 240, .10), 0 0 16px rgba(102, 72, 208, .42); }
+  }
+
+  @keyframes labelPop {
+    0%, 8%, 26%, 100% {
+      opacity: 0;
+      transform: translate(-30px, -50%) scale(.9);
+      filter: blur(1px);
+    }
+    12%, 22% {
+      opacity: 1;
+      transform: translate(0, -50%) scale(1);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes squareFlash {
+    0%, 8%, 21%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+    12%, 17% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .world,
+    .route,
+    .node,
+    .tx,
+    .square-ping {
+      animation-play-state: paused;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="stage" aria-label="Recreated dotted global transaction animation">
+    <section class="phone-frame">
+      <div class="world">
+        <div class="soft-rings"></div>
+        <canvas id="map" width="1050" height="1370"></canvas>
+        <svg viewBox="0 0 1050 1370" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="purpleStroke" x1="0" x2="1" y1="0" y2="1">
+              <stop stop-color="#3e35c8"/>
+              <stop offset=".55" stop-color="#8b43d5"/>
+              <stop offset="1" stop-color="#d13f9d"/>
+            </linearGradient>
+            <linearGradient id="pinkStroke" x1="0" x2="1">
+              <stop stop-color="#f0747c"/>
+              <stop offset=".58" stop-color="#d8339d"/>
+              <stop offset="1" stop-color="#6940d6"/>
+            </linearGradient>
+            <linearGradient id="blueStroke" x1="0" x2="1">
+              <stop stop-color="#2224b8"/>
+              <stop offset="1" stop-color="#7a45d4"/>
+            </linearGradient>
+            <linearGradient id="orangeStroke" x1="0" x2="1">
+              <stop stop-color="#f2a765"/>
+              <stop offset=".62" stop-color="#da3e9c"/>
+              <stop offset="1" stop-color="#4f37c6"/>
+            </linearGradient>
+          </defs>
+
+          <path class="route purple" style="--delay:-.8s;--dash:1800" d="M185 360 C330 170 650 165 835 320"/>
+          <path class="route pink" style="--delay:4.9s;--dash:1800" d="M840 325 C660 315 470 430 385 640 S300 850 380 1005"/>
+          <path class="route blue" style="--delay:10.4s;--dash:1800" d="M375 1005 C485 820 625 700 770 630"/>
+          <path class="route orange thin" style="--delay:16s;--dash:1800" d="M235 440 C390 250 650 250 875 395"/>
+          <path class="route purple" style="--delay:21.7s;--dash:1800" d="M805 850 C635 805 485 715 345 610"/>
+          <path class="route pink thin" style="--delay:26.5s;--dash:1800" d="M840 400 C675 330 500 315 255 375"/>
+        </svg>
+
+        <div class="labels">
+          <i class="node" style="--x:18.1;--y:26.6;--delay:-.8s"></i>
+          <i class="node hot" style="--x:34.3;--y:75.2;--delay:4.9s"></i>
+          <i class="node" style="--x:75.2;--y:46.4;--delay:10.4s"></i>
+          <i class="node hot" style="--x:86.2;--y:29.6;--delay:16s"></i>
+          <i class="node" style="--x:31.4;--y:44.5;--delay:21.7s"></i>
+          <i class="node hot" style="--x:24.8;--y:27.4;--delay:26.5s"></i>
+          <i class="node hot" style="--x:79.5;--y:23.4;--delay:-.8s"></i>
+          <i class="node" style="--x:36.2;--y:73.3;--delay:4.9s"></i>
+          <i class="node hot" style="--x:73.3;--y:46;--delay:10.4s"></i>
+          <i class="node" style="--x:83.3;--y:28.8;--delay:16s"></i>
+          <i class="node hot" style="--x:32.9;--y:44.5;--delay:21.7s"></i>
+          <i class="node" style="--x:24.3;--y:27.4;--delay:26.5s"></i>
+
+          <i class="square-ping" style="--x:83;--y:30;--delay:2.5s"></i>
+          <i class="square-ping" style="--x:36;--y:74;--delay:8.2s"></i>
+          <i class="square-ping" style="--x:82;--y:42;--delay:18.6s"></i>
+          <i class="square-ping" style="--x:28;--y:29;--delay:27.2s"></i>
+        </div>
+      </div>
+      <div class="grain"></div>
+    </section>
+  </main>
+
+<script>
+(() => {
+  const canvas = document.getElementById('map');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  const rng = mulberry32(1102);
+  const dots = [];
+  const mist = [];
+  const globe = {
+    cx: W * .52,
+    cy: H * .51,
+    rx: W * .50,
+    ry: H * .38
+  };
+  const totalDuration = 30.4;
+  const spinSpeed = .10;
+  const routes = [
+    { from: [398, 380], to: [642, 320], delay: -3.9, colorA: '#3e35c8', colorB: '#d13f9d', lift: 130, amount: '$750', token: 'CASH', coin: '#1e2f9f' },
+    { from: [615, 330], to: [438, 880], delay: 1.8, colorA: '#d8339d', colorB: '#6d42d6', lift: 105, amount: '$338', token: 'USDC', coin: '#14208e' },
+    { from: [285, 430], to: [405, 900], delay: 7.3, colorA: '#2224b8', colorB: '#7a45d4', lift: 85, amount: '$175', token: 'USDB', coin: '#641bf0' },
+    { from: [145, 390], to: [310, 580], delay: 12.9, colorA: '#f2a765', colorB: '#4f37c6', lift: 120, amount: '$181', token: 'USDC', coin: '#1527a1' },
+    { from: [820, 430], to: [905, 820], delay: 18.6, colorA: '#7a45d4', colorB: '#3421b5', lift: 78, amount: '$575', token: 'USDB', coin: '#7a32ef' },
+    { from: [640, 350], to: [820, 420], delay: 23.4, colorA: '#f0747c', colorB: '#6d42d6', lift: 118, amount: '$534', token: 'USDC', coin: '#121b89' }
+  ].map(route => ({
+    ...route,
+    start: coordFromXY(route.from[0], route.from[1]),
+    end: coordFromXY(route.to[0], route.to[1])
+  })).map(route => stabilizeRouteDirection(route));
+
+  const shapes = [
+    { name: 'northAmerica', count: 2850, cx: 230, cy: 365, rx: 260, ry: 185, rot: -0.22, hue: 'blue', trim: p => p.x < 440 && p.y < 650 && p.y > 145 && !(p.x > 320 && p.y > 470) },
+    { name: 'southAmerica', count: 1650, cx: 405, cy: 860, rx: 128, ry: 285, rot: -0.3, hue: 'blue', trim: p => p.y > 560 && p.y < 1280 && p.x > 210 && p.x < 590 },
+    { name: 'europeAsia', count: 4100, cx: 665, cy: 310, rx: 380, ry: 155, rot: 0.1, hue: 'pink', trim: p => p.y > 135 && p.y < 520 && p.x > 300 },
+    { name: 'africa', count: 1900, cx: 675, cy: 650, rx: 150, ry: 245, rot: -0.12, hue: 'mixed', trim: p => p.y > 415 && p.y < 980 && p.x > 495 && p.x < 845 },
+    { name: 'australia', count: 800, cx: 882, cy: 905, rx: 130, ry: 80, rot: 0.15, hue: 'pink', trim: p => p.y > 790 && p.x > 700 },
+    { name: 'scandinavia', count: 520, cx: 635, cy: 170, rx: 92, ry: 50, rot: 0.25, hue: 'pink', trim: p => p.y < 245 },
+    { name: 'islands', count: 420, cx: 870, cy: 625, rx: 130, ry: 180, rot: -.45, hue: 'mixed', trim: p => p.x > 730 && p.y > 490 }
+  ];
+
+  for (const shape of shapes) {
+    let placed = 0;
+    let guard = 0;
+    while (placed < shape.count && guard < shape.count * 20) {
+      guard++;
+      const r = Math.sqrt(rng());
+      const a = rng() * Math.PI * 2;
+      const rough = .76 + rng() * .34;
+      const lx = Math.cos(a) * shape.rx * r * rough;
+      const ly = Math.sin(a) * shape.ry * r * (.82 + rng() * .35);
+      const x = shape.cx + lx * Math.cos(shape.rot) - ly * Math.sin(shape.rot);
+      const y = shape.cy + lx * Math.sin(shape.rot) + ly * Math.cos(shape.rot);
+      const p = { x, y };
+      if (!shape.trim(p)) continue;
+      const edge = distanceFromCenter(shape, x, y);
+      if (edge > 1.09 || (edge < .33 && rng() < .75)) continue;
+      if (rng() < notch(x, y)) continue;
+      storeDot(x, y, shape.hue, edge, rng());
+      placed++;
+    }
+  }
+
+  storeMist();
+  render();
+
+  function storeDot(x, y, hue, edge, seed) {
+    const size = seed > .965 ? 2.2 : seed > .78 ? 1.55 : 1.05;
+    let color;
+    if (hue === 'blue') {
+      color = mix('#211ea5', '#7660d9', clamp((x + y * .22) / 700, 0, 1));
+    } else if (hue === 'pink') {
+      color = mix('#bf209b', '#ef7773', clamp((x - 450) / 570, 0, 1));
+    } else {
+      color = mix('#3421b5', '#d42e99', clamp((x + y - 760) / 520, 0, 1));
+    }
+    dots.push({
+      lon: (x / W - .5) * Math.PI * 2.34,
+      lat: (.5 - y / H) * Math.PI * 1.18,
+      size,
+      color,
+      alpha: clamp(.14 + edge * .75 + seed * .18, .08, .88),
+      wobble: seed * Math.PI * 2
+    });
+  }
+
+  function storeMist() {
+    for (let i = 0; i < 1700; i++) {
+      const x = rng() * W;
+      const y = rng() * H;
+      const color = x < W * .42 ? '#8176d8' : x > W * .62 ? '#e4a0bd' : '#d8d1ee';
+      mist.push({
+        x,
+        y,
+        color,
+        size: rng() * 1.25 + .3,
+        alpha: .035 + rng() * .09
+      });
+    }
+  }
+
+  function render(now = 0) {
+    const t = now / 1000;
+    const spin = t * spinSpeed;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, W, H);
+
+    const glow = ctx.createRadialGradient(globe.cx, globe.cy, W * .06, globe.cx, globe.cy, W * .62);
+    glow.addColorStop(0, 'rgba(255,255,255,.96)');
+    glow.addColorStop(.66, 'rgba(255,255,255,.74)');
+    glow.addColorStop(1, 'rgba(238,242,255,.50)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.ellipse(globe.cx, globe.cy, globe.rx, globe.ry, -.09, 0, Math.PI * 2);
+    ctx.fill();
+
+    for (const speck of mist) {
+      ctx.globalAlpha = speck.alpha;
+      ctx.fillStyle = speck.color;
+      ctx.fillRect(speck.x, speck.y, speck.size, speck.size);
+    }
+
+    for (const dot of dots) {
+      const point = project(dot.lon, dot.lat, spin);
+      const px = point.x;
+      const py = point.y;
+      const horizon = point.horizon;
+      if (horizon <= 0) continue;
+
+      ctx.globalAlpha = dot.alpha * (.18 + horizon * .88);
+      ctx.fillStyle = dot.color;
+      ctx.beginPath();
+      ctx.arc(px, py, dot.size * (.72 + horizon * .38), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    drawRoutes(t, spin);
+
+    ctx.globalAlpha = .28;
+    ctx.strokeStyle = 'rgba(119, 96, 221, .10)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(globe.cx, globe.cy, globe.rx, globe.ry, -.09, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    requestAnimationFrame(render);
+  }
+
+  function drawRoutes(t, spin) {
+    const activeRoutes = [];
+
+    for (const route of routes) {
+      const local = cycle01(t - route.delay, totalDuration);
+      if (local < .02 || local > .56) continue;
+
+      const start = project(route.start.lon, route.start.lat, spin);
+      const end = project(route.end.lon, route.end.lat, spin);
+      const landVisibility = clamp((start.horizon + end.horizon) * .5, 0, 1);
+
+      const midX = (start.x + end.x) / 2;
+      const midY = (start.y + end.y) / 2 - route.lift * (.65 + landVisibility * .35);
+      const control = {
+        x: midX * .62 + globe.cx * .38,
+        y: midY * .78 + globe.cy * .22
+      };
+      const visibilityAlpha = .86 * clamp(.5 + landVisibility * .7, 0, 1);
+      const drawProgress = smoothstep(.02, .105, local);
+      const eraseProgress = smoothstep(.47, .56, local);
+      const lineAlpha = visibilityAlpha * (1 - smoothstep(.53, .56, local));
+      if (drawProgress <= 0 || eraseProgress >= 1) continue;
+
+      const centerScore = 1 - clamp(Math.hypot(control.x - globe.cx, control.y - globe.cy) / (globe.rx * .85), 0, 1);
+      activeRoutes.push({
+        route,
+        local,
+        start,
+        end,
+        control,
+        visibilityAlpha,
+        drawProgress,
+        eraseProgress,
+        lineAlpha,
+        score: lineAlpha + centerScore * .18
+      });
+    }
+
+    activeRoutes
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2)
+      .forEach(({ route, local, start, end, control, visibilityAlpha, drawProgress, eraseProgress, lineAlpha }) => {
+      const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
+      gradient.addColorStop(0, route.colorA);
+      gradient.addColorStop(1, route.colorB);
+
+      ctx.save();
+      ctx.globalAlpha = lineAlpha;
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 2.25;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = 'rgba(104, 69, 205, .18)';
+      ctx.shadowBlur = 4;
+      drawCurveSegment(start, control, end, eraseProgress, drawProgress);
+
+      const startNodeAlpha = lineAlpha * (1 - smoothstep(.47, .53, local));
+      const endNodeAlpha = lineAlpha * smoothstep(.075, .105, local);
+      drawRouteNode(start.x, start.y, route.colorA, startNodeAlpha);
+      drawRouteNode(end.x, end.y, route.colorB, endNodeAlpha);
+
+      const tagMove = smoothstep(.14, .42, local);
+      const tagAlpha = visibilityAlpha * smoothstep(.125, .155, local) * (1 - smoothstep(.43, .48, local));
+      if (tagAlpha > .01) {
+        const tagPoint = pointOnQuadratic(start, control, end, tagMove);
+        drawRouteLabel(tagPoint.x, tagPoint.y, route, tagAlpha);
+      }
+      ctx.restore();
+    });
+  }
+
+  function drawCurveSegment(start, control, end, from, to) {
+    const steps = 44;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const u = from + (to - from) * (i / steps);
+      const p = pointOnQuadratic(start, control, end, u);
+      if (i === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+  }
+
+  function pointOnQuadratic(start, control, end, u) {
+    const inv = 1 - u;
+    return {
+      x: inv * inv * start.x + 2 * inv * u * control.x + u * u * end.x,
+      y: inv * inv * start.y + 2 * inv * u * control.y + u * u * end.y
+    };
+  }
+
+  function drawRouteNode(x, y, color, alpha) {
+    ctx.globalAlpha = alpha * .18;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = 'rgba(255, 255, 255, .94)';
+    ctx.beginPath();
+    ctx.arc(x, y, 6.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  function drawRouteLabel(x, y, route, alpha) {
+    const height = 25;
+    const icon = 25;
+    const pad = 9;
+    const gap = 7;
+    const label = `${route.amount} ${route.token}`;
+
+    ctx.save();
+    ctx.font = '700 11.5px Inter, system-ui, sans-serif';
+    const width = icon + gap + ctx.measureText(label).width + pad * 2;
+    let left = x + 12;
+    let top = y - height / 2;
+    if (left + width > W - 14) left = x - width - 12;
+    if (top < 14) top = y + 12;
+    if (top + height > H - 14) top = y - height - 12;
+
+    ctx.globalAlpha = alpha;
+    ctx.shadowColor = 'rgba(42, 34, 90, .12)';
+    ctx.shadowBlur = 16;
+    ctx.shadowOffsetY = 6;
+    roundedRect(left, top, width, height, 3);
+    ctx.fillStyle = 'rgba(255, 255, 255, .96)';
+    ctx.fill();
+
+    ctx.shadowColor = 'transparent';
+    roundedRect(left, top, icon, height, 3);
+    ctx.fillStyle = route.coin;
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, .9)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(left + icon / 2, top + height / 2, 6.4, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255, 255, 255, .94)';
+    ctx.beginPath();
+    ctx.arc(left + icon / 2 - 2.4, top + height / 2 + 1.8, 1.55, 0, Math.PI * 2);
+    ctx.arc(left + icon / 2 + 3.2, top + height / 2 + 1.8, 1.55, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#101727';
+    ctx.fillText(route.amount, left + icon + gap + pad, top + height / 2);
+    const amountWidth = ctx.measureText(route.amount).width;
+    ctx.fillStyle = '#485062';
+    ctx.fillText(route.token, left + icon + gap + pad + amountWidth + 4, top + height / 2);
+    ctx.restore();
+  }
+
+  function roundedRect(x, y, width, height, radius) {
+    const r = Math.min(radius, height / 2, width / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function project(lon, lat, spin) {
+    const spunLon = lon + spin;
+    const cosLat = Math.cos(lat);
+    const x3 = Math.sin(spunLon) * cosLat;
+    const z3 = Math.cos(spunLon) * cosLat;
+    const y3 = Math.sin(lat);
+    return {
+      x: globe.cx + x3 * globe.rx,
+      y: globe.cy - y3 * globe.ry,
+      horizon: clamp((z3 + .22) / 1.22, 0, 1)
+    };
+  }
+
+  function stabilizeRouteDirection(route) {
+    const sampleSpin = (route.delay + totalDuration * .2) * spinSpeed;
+    const startX = projectedX(route.start.lon, route.start.lat, sampleSpin);
+    const endX = projectedX(route.end.lon, route.end.lat, sampleSpin);
+    if (startX <= endX) return route;
+    return {
+      ...route,
+      start: route.end,
+      end: route.start,
+      colorA: route.colorB,
+      colorB: route.colorA
+    };
+  }
+
+  function projectedX(lon, lat, spin) {
+    return globe.cx + Math.sin(lon + spin) * Math.cos(lat) * globe.rx;
+  }
+
+  function coordFromXY(x, y) {
+    return {
+      lon: (x / W - .5) * Math.PI * 2.34,
+      lat: (.5 - y / H) * Math.PI * 1.18
+    };
+  }
+
+  function cycle01(value, duration) {
+    return ((value % duration) + duration) % duration / duration;
+  }
+
+  function smoothstep(edge0, edge1, x) {
+    const v = clamp((x - edge0) / (edge1 - edge0), 0, 1);
+    return v * v * (3 - 2 * v);
+  }
+
+  function distanceFromCenter(shape, x, y) {
+    const dx = x - shape.cx;
+    const dy = y - shape.cy;
+    const lx = dx * Math.cos(-shape.rot) - dy * Math.sin(-shape.rot);
+    const ly = dx * Math.sin(-shape.rot) + dy * Math.cos(-shape.rot);
+    return Math.sqrt((lx / shape.rx) ** 2 + (ly / shape.ry) ** 2);
+  }
+
+  function notch(x, y) {
+    let cut = 0;
+    if (x > 430 && x < 590 && y > 275 && y < 560) cut += .75;
+    if (x > 560 && x < 750 && y > 470 && y < 610) cut += .35;
+    if (x < 230 && y > 475 && y < 720) cut += .45;
+    if (x > 805 && y > 350 && y < 610) cut += .35;
+    return Math.min(cut, .9);
+  }
+
+  function mulberry32(seed) {
+    return function random() {
+      let t = seed += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function mix(a, b, t) {
+    const aa = hex(a);
+    const bb = hex(b);
+    const rr = aa.map((v, i) => Math.round(v + (bb[i] - v) * t));
+    return `rgb(${rr[0]},${rr[1]},${rr[2]})`;
+  }
+
+  function hex(value) {
+    return value.replace('#', '').match(/.{2}/g).map(v => parseInt(v, 16));
+  }
+})();
+</script>
+</body>
+</html>
